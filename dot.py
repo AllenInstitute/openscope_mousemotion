@@ -581,7 +581,9 @@ class DotStim(BaseVisualStim, ColorMixin, ContainerMixin):
             newDots = np.random.uniform(-0.5, 0.5, size = (nDots, 2)) * self.fieldSize
 
         return newDots
-
+      
+#updating the position of the dots for the square aparatus according to the direction of the movement
+               
     def getRandPosInSquareSide(self,sideNum):
         xy = np.zeros((1, 2))
         if sideNum==0:
@@ -598,7 +600,8 @@ class DotStim(BaseVisualStim, ColorMixin, ContainerMixin):
             xy[:,1] = 0.5*self.fieldSize[1] #set y 
         return xy
             
-    
+  #  main for updating dots (also here is where the dot in circle are updated)
+ 
     def _update_OutOfBoundXY(self, outofbounds):
         nOutOfBounds = outofbounds.sum()
         allDir = self._dotsDir[outofbounds];
