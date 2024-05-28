@@ -5,7 +5,7 @@ import random
 
 
 win = visual.Window([1000,1000], fullscr=False,color="black", winType='pyglet', waitBlanking=False)
-win.clearBuffer(color=True)
+win.clearBuffer()
 
 
 def set_trials_sqr(n_reps, direction_vec, coherence_level,n_dotsPerTrail,shuff=True):
@@ -36,6 +36,43 @@ def set_trials_sqr(n_reps, direction_vec, coherence_level,n_dotsPerTrail,shuff=T
        random.shuffle(all_trials)           
        return(all_trials)
 
+def _calculateMinEdges(lineWidth, threshold=180):
+    """
+    Calculate how many points are needed in an equilateral polygon for the gap between line rects to be < 1px and
+    for corner angles to exceed a threshold.
+
+    In other words, how many edges does a polygon need to have to appear smooth?
+
+    lineWidth : int, float, np.ndarray
+        Width of the line in pixels
+
+    threshold : int
+        Maximum angle (degrees) for corners of the polygon, useful for drawing a circle. Supply 180 for no maximum
+        angle.
+    """
+    # sin(theta) = opp / hyp, we want opp to be 1/8 (meaning gap between rects is 1/4px, 1/2px in retina)
+    opp = 1.0/8
+    hyp = lineWidth / 2
+    thetaR = np.arcsin(opp / hyp)
+    theta = np.degrees(thetaR)    
+    print(thetaR)
+    print(threshold)
+
+    # If theta is below threshold, use threshold instead
+    theta = min(theta, threshold / 2)
+    # Angles in a shape add up to 360, so theta is 360/2n, solve for n
+    return int((360 / theta) / 2)
+
+def _calcEquilateralVertices(edges, radius=0.5):
+    """
+    Get vertices for an equilateral shape with a given number of sides, will assume radius is 0.5 (relative) but
+    can be manually specified
+    """
+    d = np.pi * 2.0 / edges
+    vertices = np.asarray(
+        [np.asarray((np.sin(e * d), np.cos(e * d))) * radius
+            for e in range(int(round(edges)))])
+    return vertices
 
 
 dirVec=[0, 45 ,90, 135, 180 ,225, 270 ,315] 
@@ -76,12 +113,12 @@ for dot_info in zip(alltrials):
                  nDotsSquare = round(areaSquare*nDotsPer1SqrArea)   
   r = 128
   circle = visual.ShapeStim(
-        win, vertices="circle",
+        win, vertices= _calcEquilateralVertices(_calculateMinEdges(1.5, threshold=5)),
         pos=(0.5, 0.5), size=(r*2, r*2), units="pix",
         fillColor="black",  opacity=1, interpolate=True,
         autoDraw=False)
     
-  rdkCircle = visual.DotStim(win, nDots=nDotsCircle, coherence=coherencePerTrial,
+  rdkCircle = visual.DotStim(win, nDots=int(nDotsCircle), coherence=coherencePerTrial,
                         fieldPos=(0,0), 
                         fieldSize=(fieldSizeCircle,fieldSizeCircle), 
                         fieldShape='circle', dotSize=15.0, 
@@ -92,7 +129,7 @@ for dot_info in zip(alltrials):
                         signalDots='same', 
                         noiseDots='direction', name='', 
                         autoLog=True)
-  rdkSqr = visual.DotStim(win, nDots=nDotsSquare, coherence=coherencePerTrial, 
+  rdkSqr = visual.DotStim(win, nDots=int(nDotsSquare), coherence=coherencePerTrial, 
                         fieldPos=(0,0), 
                         fieldSize=(fieldSizeSquare,fieldSizeSquare), 
                         fieldShape='sqr', dotSize=15.0, 
