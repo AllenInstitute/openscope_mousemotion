@@ -215,7 +215,6 @@ class FixedDotStim(visual.DotStim):
         # update the pixel XY coordinates in pixels (using _BaseVisual class)
         self._updateVertices()
 
-
 # The function below are necesasry to generate the dots in the circle with older version of psychopy
 def _calculateMinEdges(lineWidth, threshold=180):
     """

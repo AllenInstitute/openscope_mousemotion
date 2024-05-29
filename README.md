@@ -15,7 +15,7 @@
     `conda activate allen_stimulus`
 3. Install the AIBS `camstim` package in the environment.  
     `pip install camstim/.`
-4. Download required video clips from [movie_clips.zip](https://tigress-web.princeton.edu/~dmturner/allen_stimulus/movie_clips.zip)
-   Extract into the `data` directory.
-5. Run the script:
+4. Run the script:
     `python pilot_script.py`
+5. Alternatively, you can run (without camstim ecosytem) :
+    `python dotGenerate.py`
