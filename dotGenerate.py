@@ -297,13 +297,18 @@ for dot_info in zip(alltrials):
         fillColor="black",  opacity=1, interpolate=True,
         autoDraw=False)
     
+  # if only one dot we set size of dots to 0
+  if nDotsCircle == 1:
+    rdkCircle_opacity = 0.0
+  else:
+    rdkCircle_opacity = 1.0
   rdkCircle = FixedDotStim(win, nDots=int(nDotsCircle), coherence=coherencePerTrial,
                         fieldPos=(0,0), 
                         fieldSize=(fieldSizeCircle,fieldSizeCircle), 
                         fieldShape='circle', dotSize=15.0, 
                         dotLife=-1, dir=dirCirc, speed=0.01, 
                         rgb=None, color=(255,255,255), 
-                        colorSpace='rgb255', opacity=1,
+                        colorSpace='rgb255', opacity=rdkCircle_opacity,
                         contrast=1.0, depth=0, element=None, 
                         signalDots='same', 
                         noiseDots='direction', name='', 
@@ -314,7 +319,7 @@ for dot_info in zip(alltrials):
                         fieldShape='sqr', dotSize=15.0, 
                         dotLife=-1, dir=dirSqr, speed=0.01, 
                         rgb=None, color=(255,255,255), 
-                        colorSpace='rgb255', opacity=1.0,
+                        colorSpace='rgb255', opacity=rdkCircle_opacity,
                         contrast=1.0, depth=0, element=None, 
                         signalDots='same', 
                         noiseDots='direction', name='', 
@@ -336,9 +341,11 @@ for dot_info in zip(alltrials):
       if n_dots == 1:
                rdkSqr.draw()  
                circle.draw()
+               rdkCircle.draw()
                win.flip()
 
       elif n_dots == 2:
+              rdkSqr.draw()  
               circle.draw()
               rdkCircle.draw()
               win.flip()
