@@ -79,6 +79,9 @@ class FixedDotStim(visual.DotStim):
 
         return newDots
       
+    def setdotSize(self, dotSize):
+        self.dotSize = dotSize
+
 #updating the position of the dots for the square aparatus according to the direction of the movement
     def getRandPosInSquareSide(self,sideNum):
         xy = np.zeros((1, 2))
@@ -264,8 +267,8 @@ def init_dot_stim(window, field_size, ndots, field_shape, stim_name):
                                         signalDots='same', 
                                         noiseDots='direction', name='', 
                                         autoLog=True),
-                            sweep_params = { 'Dir': (dirVec, 0),
-                                                    'FieldCoherence': (coherence_vec, 1),
+                            sweep_params = { 'Dir': (dirVec, 0), 'dotSize': ([1, 15.0], 1),
+                                                    'FieldCoherence': (coherence_vec, 2),
                                                         },
                             sweep_length       = 1.0,
                             start_time          = 0.0,
