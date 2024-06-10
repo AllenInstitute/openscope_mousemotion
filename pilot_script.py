@@ -267,8 +267,7 @@ def init_dot_stim(window, field_size, ndots, field_shape, stim_name):
                                         signalDots='same', 
                                         noiseDots='direction', name='', 
                                         autoLog=True),
-                            sweep_params = { 'Dir': (dirVec, 0), 'dotSize': ([1, 15.0], 1),
-                                                    'FieldCoherence': (coherence_vec, 2),
+                            sweep_params = { 'Dir': (dirVec, 0), 'FieldCoherence': (coherence_vec, 2),
                                                         },
                             sweep_length       = 1.0,
                             start_time          = 0.0,
@@ -287,7 +286,7 @@ def init_circle(window, r=128, repetitions=10):
         win, vertices= _calcEquilateralVertices(_calculateMinEdges(1.5, threshold=5)),
         pos=(0.5, 0.5), size=(r*2, r*2), units="pix",
         fillColor="gray",  opacity=1, interpolate=True,
-        autoDraw=False)
+        autoDraw=False, lineWidth=0, lineColor="gray")
     circle_in_stim = Stimulus(circle, 
              sweep_params = {}, 
              sweep_length = 1.0, 
@@ -315,9 +314,9 @@ nb_sweeps = len(rdkSqr.sweep_table)
 print(nb_sweeps)
 circle = init_circle(win, r=128, repetitions=nb_sweeps*num_reps)
 
+list_stimuli.append(rdkSqr)
 list_stimuli.append(circle)
 list_stimuli.append(rdkCircle)
-list_stimuli.append(rdkSqr)
 both_stimuli = StimulusArray(list_stimuli, sweep_length=10.0)
 
 pre_blank = 0
