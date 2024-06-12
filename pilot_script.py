@@ -33,8 +33,8 @@ _piOver2 = np.pi / 2.
 _piOver180 = np.pi / 180.
 _2pi = 2 * np.pi
 
-num_reps = 10
-dirVec=[0, 45 ,90, 135, 180 ,225, 270 ,315] 
+num_reps = 3# 10
+dirVec= [0, 45] #[0, 45 ,90, 135, 180 ,225, 270 ,315] 
 coherence_vec = [1,0.5,0]
 
 # The following fixes the issue with the dots not being created on the edges of the screen. 
@@ -257,7 +257,7 @@ def _calcEquilateralVertices(edges, radius=0.5):
             for e in range(int(round(edges)))])
     return vertices
 
-def init_dot_stim(window, field_size, ndots, field_shape, stim_name):
+def init_dot_stim(window, field_size, ndots, field_shape, stim_name, sweep_length, blank_length):
 
     dot_stimuli = Stimulus(FixedDotStim(window, nDots=int(ndots), 
                                         fieldPos=(0,0), 
@@ -271,10 +271,10 @@ def init_dot_stim(window, field_size, ndots, field_shape, stim_name):
                                         noiseDots='direction', name='', 
                                         autoLog=True),
                             sweep_params = { 'Dir': (dirVec, 0), 'FieldCoherence': (coherence_vec, 1)},
-                            sweep_length       = 1.0,
+                            sweep_length       = sweep_length,
                             start_time          = 0.0,
-                            blank_length        = 0.0,
-                            blank_sweeps        = 2,
+                            blank_length        = blank_length,
+                            blank_sweeps        = 0,
                             runs                = num_reps,
                             shuffle             = True,
                             save_sweep_table    = True,
@@ -283,17 +283,17 @@ def init_dot_stim(window, field_size, ndots, field_shape, stim_name):
 
     return dot_stimuli
 
-def init_circle(window, r=128, repetitions=10):
+def init_circle(window, sweep_length, blank_length, r=128, repetitions=10):
     circle = visual.ShapeStim(
         win, vertices= _calcEquilateralVertices(_calculateMinEdges(1.5, threshold=5)),
         pos=(0.5, 0.5), size=(r*2, r*2), units="pix",
         fillColor="gray",  opacity=1, interpolate=True,
-        autoDraw=False, lineWidth=0, lineColor="gray")
+        autoDraw=False, lineWidth=1, lineColor="white")
     circle_in_stim = Stimulus(circle, 
              sweep_params = {}, 
-             sweep_length = 1.0, 
+             sweep_length = sweep_length, 
              start_time = 0.0, 
-             blank_length = 0.0, 
+             blank_length = blank_length, 
              blank_sweeps = 0, 
              runs = repetitions, 
              shuffle = True, 
@@ -302,24 +302,27 @@ def init_circle(window, r=128, repetitions=10):
     return circle_in_stim
 
 nDotsPer1SqrArea = 200
-fieldSizeCircle = 0.5
+# 0.75 seems to avoid any missing dots in the circle.
+fieldSizeCircle = 0.60 # 0.5 
 fieldSizeSquare = 2.1
+sweep_length = 3.0
+blank_length = 0.5
 areaCircle = (fieldSizeCircle/2)**2*np.pi
 areaSquare = fieldSizeSquare**2
 nDotsCircle = round(areaCircle*nDotsPer1SqrArea)
 nDotsSquare = round(areaSquare*nDotsPer1SqrArea)   
 
 list_stimuli = []
-rdkCircle = init_dot_stim(win, field_size=fieldSizeCircle, ndots=nDotsCircle, field_shape='circle', stim_name='rdkCircle')
-rdkSqr = init_dot_stim(win, field_size=fieldSizeSquare, ndots=nDotsSquare, field_shape='sqr', stim_name='rdkSqr')
+rdkCircle = init_dot_stim(win, field_size=fieldSizeCircle, ndots=nDotsCircle, field_shape='circle', stim_name='rdkCircle', sweep_length=sweep_length, blank_length=blank_length)
+rdkSqr = init_dot_stim(win, field_size=fieldSizeSquare, ndots=nDotsSquare, field_shape='sqr', stim_name='rdkSqr', sweep_length=sweep_length, blank_length=blank_length)
 nb_sweeps = len(rdkSqr.sweep_table)
 print(nb_sweeps)
-circle = init_circle(win, r=128, repetitions=nb_sweeps*num_reps)
+circle = init_circle(win, sweep_length, blank_length, r=128, repetitions=nb_sweeps*num_reps)
 
-list_stimuli.append(rdkSqr)
+# list_stimuli.append(rdkSqr)
 list_stimuli.append(circle)
 list_stimuli.append(rdkCircle)
-both_stimuli = StimulusArray(list_stimuli, sweep_length=10.0)
+both_stimuli = StimulusArray(list_stimuli, sweep_length=sweep_length, blank_length=blank_length)
 
 pre_blank = 0
 post_blank = 0
