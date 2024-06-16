@@ -49,6 +49,8 @@ class FixedDotStim(visual.DotStim):
         nDots = kwargs.get('nDots')   
         self._deadDots = np.zeros(nDots, dtype=bool)
         super(FixedDotStim, self).__init__(*args, **kwargs)
+        # This is needed to avoid bar of dots. 
+        self.refreshDots()
 
     def _newDotsXY(self, nDots):
         """Returns a uniform spread of dots, according to the `fieldShape` and
@@ -85,6 +87,8 @@ class FixedDotStim(visual.DotStim):
             
         return newDots
       
+    # The function belows are needed to allow the Stimulus object to 
+    # overwrite the parameters of the dots.
     def setdotSize(self, dotSize):
         self.dotSize = dotSize
 
@@ -93,13 +97,11 @@ class FixedDotStim(visual.DotStim):
 
     def setspeed(self, speed):
         self.speed = speed
-#
+
     def setfieldSize(self, fieldSize):
         self.fieldSize = (fieldSize,fieldSize)
 
-
-
-#updating the position of the dots for the square aparatus according to the direction of the movement
+    # updating the position of the dots for the square apparatus according to the direction of the movement
     def getRandPosInSquareSide(self,sideNum):
         xy = np.zeros((1, 2))
         if sideNum==0:
@@ -116,14 +118,14 @@ class FixedDotStim(visual.DotStim):
             xy[:,1] = 0.5*self.fieldSize[1] #set y 
         return xy
             
-  #  main for updating dots (also here is where the dot in circle are updated)
+    #  main for updating dots (also here is where the dot in circle are updated)
     def _update_OutOfBoundXY(self, outofbounds):
         nOutOfBounds = outofbounds.sum()
-        allDir = self._dotsDir[outofbounds];
+        allDir = self._dotsDir[outofbounds]
         newDots = np.zeros((nOutOfBounds, 2))
         if self.fieldShape=='sqr':
             for i in range(nOutOfBounds):
-                currDir = allDir[i]%_2pi;
+                currDir = allDir[i]%_2pi
                 modAngle = currDir % _piOver2
                 side = currDir//_piOver2
                 oddsInFirstSide = 1/(1+np.tan(modAngle))
@@ -215,7 +217,6 @@ class FixedDotStim(visual.DotStim):
             normXY = self._verticesBase / .5 / self.fieldSize
             # add out-of-bounds to those that need replacing
             outofbounds = np.hypot(normXY[:, 0], normXY[:, 1]) > 1.
-
         # update any dead dots
         nDead = self._deadDots.sum()
         if nDead:
@@ -226,7 +227,7 @@ class FixedDotStim(visual.DotStim):
         # aperture.
         nOutOfBounds = outofbounds.sum()
         if nOutOfBounds:
-           # self._verticesBase[outofbounds, :] = self._newDotsXY(nOutOfBounds)
+            # self._verticesBase[outofbounds, :] = self._newDotsXY(nOutOfBounds)
             self._verticesBase[outofbounds, :] = self._update_OutOfBoundXY(outofbounds)
 
 
@@ -235,7 +236,7 @@ class FixedDotStim(visual.DotStim):
         # update the pixel XY coordinates in pixels (using _BaseVisual class)
         self._updateVertices()
 
-# The function below are necesasry to generate the dots in the circle with older version of psychopy
+# The functions below are necessary to generate the dots in the circle with older version of psychopy
 def _calculateMinEdges(lineWidth, threshold=180):
     """
     Calculate how many points are needed in an equilateral polygon for the gap between line rects to be < 1px and
@@ -271,8 +272,7 @@ def _calcEquilateralVertices(edges, radius=0.5):
             for e in range(int(round(edges)))])
     return vertices
 
-
-#creat a table with all the desired trials combination
+# create a table with all the desired trials combination
 def set_trials_sqr(n_reps, direction_vec,InnerdirVec, coherence_level,DotSpeed,DotSize,shuff=True):
     
     opacitycirc=[0,1]
@@ -281,8 +281,6 @@ def set_trials_sqr(n_reps, direction_vec,InnerdirVec, coherence_level,DotSpeed,D
     combinations_with_fixed_opacity = list(itertools.product(direction_vec, InnerdirVec,[1], [1], coherence_level, DotSize, DotSpeed))
 
     combinations_with_variable_opacity = list(itertools.product(direction_vec, InnerdirVec, opacitycirc, opacitysqr, coherence_level, DotSize, DotSpeed))
-
-
     
     filtered_combinations_with_variable_opacity = []
     for combo in combinations_with_variable_opacity:
@@ -292,25 +290,15 @@ def set_trials_sqr(n_reps, direction_vec,InnerdirVec, coherence_level,DotSpeed,D
             continue
         filtered_combinations_with_variable_opacity.append(combo)
 
-
-
-# Combine both sets of combinations
+    # Combine both sets of combinations
     all_combinations = combinations_with_fixed_opacity + filtered_combinations_with_variable_opacity
     
     all_trials = []
     for combination in all_combinations:
         all_trials.extend([combination] * n_reps)
-        
-        
+                
     random.shuffle(all_trials)     
     return(all_trials)
-
-    
-    
-    
-    
-
-
 
 # set a similar order for the trials the dorCirc and dotSqr
 def set_new_trial_orders (alltrial, circTable, sqrTable):
@@ -382,7 +370,6 @@ def init_dot_stim_circ(window,num_reps,field_size,ndots, field_shape, stim_name,
                                          signalDots='same', 
                                          noiseDots='direction', name='', 
                                          autoLog=True),
-                            
                             sweep_params        = sweep_params_exp_circ,
                             sweep_length        = sweep_length_num,
                             start_time          = start_time_nun,
@@ -390,7 +377,6 @@ def init_dot_stim_circ(window,num_reps,field_size,ndots, field_shape, stim_name,
                             blank_sweeps        = blank_sweeps_num,
                             runs                = num_reps,
                             shuffle             = True,
-                            
                             )
 
     dot_stimuli_circ.stim_path = r"C:\\not_a_stim_script\\"+stim_name+".stim"
@@ -417,60 +403,86 @@ def init_circle(window, r=128, repetitions=10):
     
     return circle_in_stim
 
-
-
- 
-# create the stimulus accroding to the desired  params and creat a list of stimuli
-def callAccParameter(win,num_reps_ex,fieldSize_Circle,fieldSize_Square,ndots_circ,ndots_sqr,sweep_params_circ,sweep_params_sqr):
+# create the stimulus accroding to the desired  params and create a list of stimuli
+def callAccParameter(win
+                     ,num_reps_ex
+                     ,fieldSize_Circle
+                     ,fieldSize_Square
+                     ,ndots_circ
+                     ,ndots_sqr
+                     ,sweep_params_circ
+                     ,sweep_params_sqr
+                     ):
+        
         alltrial = []        
         list_stimuli = []  
                 
-        rdkCircle = init_dot_stim_circ(win,num_reps_ex,field_size = fieldSize_Circle,ndots=ndots_circ, field_shape='circle', stim_name='rdkCircle', 
-                                       sweep_params_exp_circ= sweep_params_circ,)
-# sweep order and sweep table    
+        rdkCircle = init_dot_stim_circ(win
+                    ,num_reps_ex
+                    ,field_size=fieldSize_Circle
+                    ,ndots=ndots_circ
+                    ,field_shape='circle'
+                    ,stim_name='rdkCircle'
+                    ,sweep_params_exp_circ=sweep_params_circ
+                    )
+        
+        # sweep order and sweep table    
         circle_sweepTable = rdkCircle.sweep_table
         
-        rdkSqr = init_dot_stim(win,num_reps_ex,field_size =fieldSize_Square,ndots=ndots_sqr, field_shape='sqr', stim_name='rdkSqr',
-                               sweep_params_exp_sqr=sweep_params_sqr,)
+        rdkSqr = init_dot_stim(win
+                    ,num_reps_ex
+                    ,field_size=fieldSize_Square
+                    ,ndots=ndots_sqr
+                    ,field_shape='sqr'
+                    ,stim_name='rdkSqr'
+                    ,sweep_params_exp_sqr=sweep_params_sqr
+                    )
     
         sqr_sweepTable = rdkSqr.sweep_table  
 
-#num_reps_ex/2
+        # num_reps_ex/2
         if round(num_reps_ex/2)== 0 :
            n_reps_ex = 1
         else:
            n_reps_ex = round(n_reps_ex/2)
            
-        alltrial= set_trials_sqr(n_reps=num_reps_ex, direction_vec=sweep_params_sqr['Dir'][0],InnerdirVec=sweep_params_sqr['Dir'][0] ,
-                                           coherence_level=sweep_params_sqr['FieldCoherence'][0]
-              ,DotSize=sweep_params_sqr['dotSize'][0],DotSpeed= sweep_params_sqr['speed'][0],shuff=True) 
+        alltrial= set_trials_sqr(
+            n_reps=num_reps_ex
+            ,direction_vec=sweep_params_sqr['Dir'][0]
+            ,InnerdirVec=sweep_params_sqr['Dir'][0]
+            ,coherence_level=sweep_params_sqr['FieldCoherence'][0]
+            ,DotSize=sweep_params_sqr['dotSize'][0]
+            ,DotSpeed= sweep_params_sqr['speed'][0]
+            ,shuff=True
+            ) 
         
-    
-        sweepOrderCirc,sweepOrderSqr = set_new_trial_orders (alltrial, circle_sweepTable, sqr_sweepTable)
+        sweepOrderCirc,sweepOrderSqr = set_new_trial_orders(
+            alltrial
+            ,circle_sweepTable
+            ,sqr_sweepTable
+            )
  
- # sweep order and sweep table    
+        # sweep order and sweep table    
         rdkSqr.sweep_order = sweepOrderSqr
         rdkCircle.sweep_order = sweepOrderCirc
 
         nb_sweeps = len(rdkSqr.sweep_order)
-        circle = init_circle(win,r=128, repetitions=nb_sweeps*num_reps_ex)
-        #circle.sweep_order = sweepOrderSqr
+        circle = init_circle(win
+                ,r=128
+                ,repetitions=nb_sweeps*num_reps_ex
+                )
         
         list_stimuli.append(rdkSqr)
         list_stimuli.append(circle)
         list_stimuli.append(rdkCircle)
         
-        both_stimuli = StimulusArray(list_stimuli, sweep_length=10.0)
+        both_stimuli = StimulusArray(list_stimuli, 
+                            sweep_length = sweep_length_num,
+                            blank_length = blank_length_num                            )
         
-        return both_stimuli
-    
- 
-    
-    
+        return both_stimuli    
     
 def main(): 
-    
-    
     nDotsPer1SqrArea = 200
     fieldSizeCircle = 0.5
     fieldSizeSquare = 2.1
@@ -478,9 +490,6 @@ def main():
     areaSquare = fieldSizeSquare**2
     nDotsCircle = round(areaCircle*nDotsPer1SqrArea)
     nDotsSquare = round(areaSquare*nDotsPer1SqrArea)   
-    
-    fieldsize_Circvec = [fieldSizeCircle ]
-    fieldsize_Sqrvec = [fieldSizeSquare ]
     
     num_reps = 1
     #dirVec=[0, 45 ,90, 135, 180 ,225, 270 ,315]
@@ -491,45 +500,75 @@ def main():
     dotsize_vec = [12]
     dotspeed_vec = [0.01]
     
-    sweep_params_exp_circ = { 'Dir': (dirVecCirc, 0),'opacity': (opacity_vec,1),
-                                  'FieldCoherence': (coherence_vec, 2), 'dotSize': (dotsize_vec,3) ,'speed':(dotspeed_vec,4),}
+    sweep_params_exp_circ = { 'Dir': (dirVecCirc, 0)
+                             ,'opacity': (opacity_vec,1)
+                             ,'FieldCoherence': (coherence_vec, 2)
+                             ,'dotSize': (dotsize_vec,3)
+                             ,'speed':(dotspeed_vec,4)
+                             }
      
-    sweep_params_exp_sqr = { 'Dir': (dirVecSqr, 0),'opacity': (opacity_vec,1),
-                                           'FieldCoherence': (coherence_vec, 2) ,'dotSize': (dotsize_vec,3) ,'speed':(dotspeed_vec,4),} 
-    
-    alltrial= set_trials_sqr(n_reps=1, direction_vec=dirVecSqr,InnerdirVec=dirVecCirc ,coherence_level=coherence_vec
-              ,DotSpeed= dotspeed_vec,DotSize=dotsize_vec,shuff=True)
+    sweep_params_exp_sqr = { 'Dir': (dirVecSqr, 0)
+                            ,'opacity': (opacity_vec,1)
+                            ,'FieldCoherence': (coherence_vec, 2)
+                            ,'dotSize': (dotsize_vec,3)
+                            ,'speed':(dotspeed_vec,4)
+                            } 
 
-    
-     #COHERENCE
+    # COHERENCE
     coherence_vec_exp = [1,0.5,0.3,0.6]
     sweep_params_exp_sqr['FieldCoherence'] = (coherence_vec_exp,2)
     sweep_params_exp_circ['FieldCoherence'] = (coherence_vec_exp,2)
 
     
-    both_stimuli_coherence = callAccParameter(win,num_reps_ex= num_reps,fieldSize_Circle =fieldSizeCircle ,fieldSize_Square= fieldSizeSquare, ndots_circ =nDotsCircle,
-                                              ndots_sqr=nDotsSquare,sweep_params_circ=sweep_params_exp_circ,sweep_params_sqr=sweep_params_exp_sqr)
+    both_stimuli_coherence = callAccParameter(win
+            ,num_reps_ex=num_reps
+            ,fieldSize_Circle=fieldSizeCircle
+            ,fieldSize_Square=fieldSizeSquare
+            ,ndots_circ=nDotsCircle
+            ,ndots_sqr=nDotsSquare
+            ,sweep_params_circ=sweep_params_exp_circ
+            ,sweep_params_sqr=sweep_params_exp_sqr
+            )
                                            
-
-     #DOT SPEED
+    # DOT SPEED
     dotspeed_vec_exp = [0.009,0.01,0.026]  
     sweep_params_exp_sqr['speed'] = (dotspeed_vec_exp,4)
     sweep_params_exp_circ['speed'] = (dotspeed_vec_exp,4)
 
-    
-    both_stimuli_speed = callAccParameter(win,num_reps_ex= num_reps,fieldSize_Circle =fieldSizeCircle ,fieldSize_Square= fieldSizeSquare, ndots_circ =nDotsCircle,
-                                              ndots_sqr=nDotsSquare,sweep_params_circ=sweep_params_exp_circ,sweep_params_sqr=sweep_params_exp_sqr)
+    # YAEL: ISN'T THIS NECESSARY?
+    # We reset Coherence to default value
+    sweep_params_exp_sqr['FieldCoherence'] = ([1],2)
+    sweep_params_exp_circ['FieldCoherence'] = ([1],2)
+
+    both_stimuli_speed = callAccParameter(win
+            ,num_reps_ex=num_reps
+            ,fieldSize_Circle=fieldSizeCircle
+            ,fieldSize_Square=fieldSizeSquare
+            ,ndots_circ=nDotsCircle
+            ,ndots_sqr=nDotsSquare
+            ,sweep_params_circ=sweep_params_exp_circ
+            ,sweep_params_sqr=sweep_params_exp_sqr
+            )
      
-    
-     #DOT Size  
+    # DOT Size  
     dotsize_vec_exp = [5,10,12,30]
     sweep_params_exp_sqr['dotSize'] =( dotsize_vec_exp,3)
     sweep_params_exp_circ['dotSize'] =( dotsize_vec_exp,3)
 
-    
-    both_stimuli_size = callAccParameter(win,num_reps_ex= num_reps,fieldSize_Circle =fieldSizeCircle ,fieldSize_Square= fieldSizeSquare, ndots_circ =nDotsCircle,
-                                              ndots_sqr=nDotsSquare,sweep_params_circ=sweep_params_exp_circ,sweep_params_sqr=sweep_params_exp_sqr)
-    
+    # YAEL: ISN'T THIS NECESSARY?
+    # We reset Speed to default value
+    sweep_params_exp_sqr['speed'] = ([0.01],4)
+    sweep_params_exp_circ['speed'] = ([0.01],4)
+
+    both_stimuli_size = callAccParameter(win
+            ,num_reps_ex=num_reps
+            ,fieldSize_Circle=fieldSizeCircle
+            ,fieldSize_Square=fieldSizeSquare
+            ,ndots_circ=nDotsCircle
+            ,ndots_sqr=nDotsSquare
+            ,sweep_params_circ=sweep_params_exp_circ
+            ,sweep_params_sqr=sweep_params_exp_sqr
+            )
     
     SessionA=[]
     
@@ -537,21 +576,14 @@ def main():
     SessionA.append(both_stimuli_speed)
     SessionA.append(both_stimuli_size)
     
-    SessionA_stimuli = StimulusArray(SessionA, sweep_length=30.0)
-    #a = both_stimuli_coherence.display_sequence
-#    both_stimuli_coherence.set_display_sequence(both_stimuli_coherence)
-#    both_stimuli_speed.set_display_sequence(both_stimuli_speed)
-#    both_stimuli_size.set_display_sequence(both_stimuli_size)
-    
-    
-    #an attamp to create a session where you see first ciherence than dot speed and than sot size
+    # an attempt to create a session where you see first coherence than dot speed and than dot size
     pre_blank = 0
     post_blank = 0
-    ss  = SweepStim(win,
-                    stimuli         = [both_stimuli_size], #need to be replaced with SessionA_stimuli
-                    pre_blank_sec   = pre_blank,
-                    post_blank_sec  = post_blank,                 
-                    params          = {},  # will be set by MPE to work on the rig
+    ss  = SweepStim(win
+                    ,stimuli = [both_stimuli_size] #need to be replaced with SessionA_stimuli
+                    ,pre_blank_sec = pre_blank
+                    ,post_blank_sec  = post_blank                 
+                    ,params = {}  # will be set by MPE to work on the rig
                     )
     
     # add in foraging so we can track wheel, potentially give rewards, etc

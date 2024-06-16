@@ -305,8 +305,11 @@ nDotsPer1SqrArea = 200
 # 0.75 seems to avoid any missing dots in the circle.
 fieldSizeCircle = 0.60 # 0.5 
 fieldSizeSquare = 2.1
+
+# These needs to be set across all objects to the same values
 sweep_length = 3.0
 blank_length = 0.5
+
 areaCircle = (fieldSizeCircle/2)**2*np.pi
 areaSquare = fieldSizeSquare**2
 nDotsCircle = round(areaCircle*nDotsPer1SqrArea)
