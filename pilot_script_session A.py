@@ -91,15 +91,19 @@ class FixedDotStim(visual.DotStim):
     # overwrite the parameters of the dots.
     def setdotSize(self, dotSize):
         self.dotSize = dotSize
+        self.refreshDots()
 
     def setopacity(self, opacity):
         self.opacity = opacity
+        self.refreshDots()
 
     def setspeed(self, speed):
         self.speed = speed
+        self.refreshDots()
 
     def setfieldSize(self, fieldSize):
         self.fieldSize = (fieldSize,fieldSize)
+        self.refreshDots()
 
     # updating the position of the dots for the square apparatus according to the direction of the movement
     def getRandPosInSquareSide(self,sideNum):
@@ -554,7 +558,6 @@ def main():
     dotsize_vec_exp = [5,10,12,30]
     sweep_params_exp_sqr['dotSize'] =( dotsize_vec_exp,3)
     sweep_params_exp_circ['dotSize'] =( dotsize_vec_exp,3)
-
     # YAEL: ISN'T THIS NECESSARY?
     # We reset Speed to default value
     sweep_params_exp_sqr['speed'] = ([0.01],4)
