@@ -17,8 +17,8 @@ import itertools
 
 from camstim import Window, Warp
 
-DIR_IND = 0;
-OPACITY_IND = 1;
+DIR_IND = 0
+OPACITY_IND = 1
 COHERENCE_IND = 2
 DOT_SIZE_IND = 3
 SPEED_IND = 4
@@ -27,10 +27,10 @@ NDOTS_IND = 6
 
 
 
-DIR_CIRC_IND_TRIAL = 0;
-DIR_SQR_IND_TRIAL  = 1;
-OPACITY_SQR_IND_TRIAL  = 2;
-OPACITY_CIRC_IND_TRIAL  = 3;
+DIR_CIRC_IND_TRIAL = 0
+DIR_SQR_IND_TRIAL  = 1
+OPACITY_SQR_IND_TRIAL  = 2
+OPACITY_CIRC_IND_TRIAL  = 3
 COHERENCE_IND_TRIAL = 4
 DOT_SIZE_IND_TRIAL = 5
 SPEED_IND_TRIAL = 6
@@ -475,7 +475,7 @@ def callAccParameter(win
                 
         rdkCircle = init_dot_stim_circ(win
                     ,num_reps_ex
-                    ,field_size=fieldSize_Circle
+                    ,field_size=(fieldSize_Circle[0], fieldSize_Circle[0])
                     ,n_dots=ndots_circ
                     ,field_shape='circle'
                     ,stim_name='rdkCircle'
@@ -487,7 +487,7 @@ def callAccParameter(win
         
         rdkSqr = init_dot_stim(win
                     ,num_reps_ex
-                    ,field_size=fieldSize_Square
+                    ,field_size=(fieldSize_Square[0], fieldSize_Square[0])
                     ,n_dots=ndots_sqr
                     ,field_shape='sqr'
                     ,stim_name='rdkSqr'
