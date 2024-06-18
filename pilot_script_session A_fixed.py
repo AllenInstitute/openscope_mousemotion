@@ -388,7 +388,6 @@ def set_new_trial_orders (alltrial, circTable, sqrTable):
 # set dotSqr
 def init_dot_stim(window,num_reps,field_size, n_dots,field_shape, stim_name,sweep_params_exp_sqr):
 #{ 'Dir': (dirVec, 0), 'FieldCoherence': (coherence_vec, 1),'dotSize': (dotsize_vec,2)}
-    print("Nb repos "+str(num_reps))
     dot_stimuli = Stimulus(FixedDotStim(window, nDots=int(n_dots), 
                                         fieldPos=(0,0), units='deg',
                                         fieldSize=(field_size[0], field_size[0]), 
@@ -417,7 +416,6 @@ def init_dot_stim(window,num_reps,field_size, n_dots,field_shape, stim_name,swee
 
 # set dotCirc
 def init_dot_stim_circ(window,num_reps,field_size, n_dots,field_shape, stim_name,sweep_params_exp_circ):
-    print("Nb repos "+str(num_reps))
     dot_stimuli_circ = Stimulus(FixedDotStim(window, nDots=int(n_dots), 
                                          fieldPos=(0,0), units='deg',
                                          fieldSize=(field_size[0], field_size[0]),
