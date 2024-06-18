@@ -14,6 +14,7 @@ from camstim import SweepStim,  Foraging
 from camstim.sweepstim import StimulusArray
 from camstim.sweepstim import Stimulus
 import itertools
+from psychopy.tools.arraytools import val2array
 
 from camstim import Window, Warp
 
@@ -134,7 +135,9 @@ class FixedDotStim(visual.DotStim):
         self.refreshDots()
 
     def setfieldSize(self, fieldSize):
-        self.fieldSize = (fieldSize,fieldSize)
+        fieldSize = val2array((fieldSize, fieldSize), False)
+        self.fieldSize = fieldSize
+        self.size = fieldSize
         self.refreshDots()
 
 
@@ -387,7 +390,7 @@ def init_dot_stim(window,num_reps,field_size, n_dots,field_shape, stim_name,swee
 #{ 'Dir': (dirVec, 0), 'FieldCoherence': (coherence_vec, 1),'dotSize': (dotsize_vec,2)}
     dot_stimuli = Stimulus(FixedDotStim(window, nDots=int(n_dots), 
                                         fieldPos=(0,0), units='deg',
-                                        fieldSize=field_size, 
+                                        fieldSize=(field_size[0], field_size[0]), 
                                         fieldShape=field_shape,
                                         dir=90, coherence =1,
                                         dotLife=-1, speed=0.01,  
@@ -416,7 +419,7 @@ def init_dot_stim_circ(window,num_reps,field_size, n_dots,field_shape, stim_name
 
     dot_stimuli_circ = Stimulus(FixedDotStim(window, nDots=int(n_dots), 
                                          fieldPos=(0,0), units='deg',
-                                         fieldSize=field_size, 
+                                         fieldSize=(field_size[0], field_size[0]),
                                          fieldShape=field_shape, 
                                          dir=90, coherence =1,
                                          dotLife=-1, speed=0.01,
@@ -475,7 +478,7 @@ def callAccParameter(win
                 
         rdkCircle = init_dot_stim_circ(win
                     ,num_reps_ex
-                    ,field_size=(fieldSize_Circle[0], fieldSize_Circle[0])
+                    ,field_size=fieldSize_Circle
                     ,n_dots=ndots_circ
                     ,field_shape='circle'
                     ,stim_name='rdkCircle'
@@ -487,7 +490,7 @@ def callAccParameter(win
         
         rdkSqr = init_dot_stim(win
                     ,num_reps_ex
-                    ,field_size=(fieldSize_Square[0], fieldSize_Square[0])
+                    ,field_size=fieldSize_Square
                     ,n_dots=ndots_sqr
                     ,field_shape='sqr'
                     ,stim_name='rdkSqr'
@@ -544,7 +547,7 @@ def callAccParameter(win
     
 def main(): 
     nDotsPer1SqrArea = 200
-    fieldSizeCircle = [20]
+    fieldSizeCircle = [5,20]
     fieldSizeSquare = [100]
    # areaCircle = (fieldSizeCircle[0]/2)**2*np.pi
   #  areaSquare = fieldSizeSquare[0]**2
