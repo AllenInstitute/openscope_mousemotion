@@ -388,6 +388,7 @@ def set_new_trial_orders (alltrial, circTable, sqrTable):
 # set dotSqr
 def init_dot_stim(window,num_reps,field_size, n_dots,field_shape, stim_name,sweep_params_exp_sqr):
 #{ 'Dir': (dirVec, 0), 'FieldCoherence': (coherence_vec, 1),'dotSize': (dotsize_vec,2)}
+    print("Nb repos "+str(num_reps))
     dot_stimuli = Stimulus(FixedDotStim(window, nDots=int(n_dots), 
                                         fieldPos=(0,0), units='deg',
                                         fieldSize=(field_size[0], field_size[0]), 
@@ -416,7 +417,7 @@ def init_dot_stim(window,num_reps,field_size, n_dots,field_shape, stim_name,swee
 
 # set dotCirc
 def init_dot_stim_circ(window,num_reps,field_size, n_dots,field_shape, stim_name,sweep_params_exp_circ):
-
+    print("Nb repos "+str(num_reps))
     dot_stimuli_circ = Stimulus(FixedDotStim(window, nDots=int(n_dots), 
                                          fieldPos=(0,0), units='deg',
                                          fieldSize=(field_size[0], field_size[0]),
@@ -444,20 +445,20 @@ def init_dot_stim_circ(window,num_reps,field_size, n_dots,field_shape, stim_name
 
 
 # set constant circ 
-def init_circle(window, r=20, repetitions=10):
+def init_circle(window, r=20, repetitions=10, sweep_param = {}):
     circle = visual.ShapeStim(
         win, vertices= _calcEquilateralVertices(_calculateMinEdges(1.5, threshold=5)),
-        pos=(0.5, 0.5), size=(r*2, r*2), units="deg",
-        fillColor="gray",  interpolate=True,
+        pos=(0, 0), size=(r*2, r*2), units="deg",
+        interpolate=True, fillColor="gray",
         autoDraw=False, lineWidth=0, lineColor="gray")
     circle_in_stim = Stimulus(circle, 
-             sweep_params = {}, 
+             sweep_params = sweep_param, 
              sweep_length = sweep_length_num, 
              start_time = start_time_nun, 
              blank_length = blank_length_num, 
              blank_sweeps = blank_sweeps_num, 
              runs = repetitions, 
-             shuffle = True, 
+             shuffle = False, 
              save_sweep_table = True)
     
     return circle_in_stim
@@ -529,10 +530,13 @@ def callAccParameter(win
         rdkSqr.sweep_order = sweepOrderSqr
         rdkCircle.sweep_order = sweepOrderCirc
 
-        nb_sweeps = len(rdkSqr.sweep_order)
+        # nb_sweeps = len(rdkSqr.sweep_order)
+        list_diameters = np.array([[(float(indiv_sweep[5])),(float(indiv_sweep[5]))] for indiv_sweep in rdkCircle.sweep_table])
+        sweep_params_background_circle = { 'Size': (list_diameters[np.array(rdkCircle.sweep_order)], 0)}
         circle = init_circle(win
                 ,r=10
-                ,repetitions=nb_sweeps*num_reps_ex
+                ,repetitions=1
+                ,sweep_param = sweep_params_background_circle
                 )
         
         list_stimuli.append(rdkSqr)
@@ -548,7 +552,7 @@ def callAccParameter(win
 def main(): 
     nDotsPer1SqrArea = 200
     fieldSizeCircle = [5,20]
-    fieldSizeSquare = [100]
+    fieldSizeSquare = [100, 100]
    # areaCircle = (fieldSizeCircle[0]/2)**2*np.pi
   #  areaSquare = fieldSizeSquare[0]**2
     
