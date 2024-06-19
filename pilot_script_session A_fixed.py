@@ -81,6 +81,10 @@ class FixedDotStim(visual.DotStim):
     def __init__(self, *args, **kwargs):
         nDots = kwargs.get('nDots')   
         self._deadDots = np.zeros(nDots, dtype=bool)
+
+        # Initialize the dots density
+        self.dotDensity = 1.0
+        
         super(FixedDotStim, self).__init__(*args, **kwargs)
         # This is needed to avoid bar of dots. 
         self.refreshDots()
@@ -140,6 +144,9 @@ class FixedDotStim(visual.DotStim):
         self.size = fieldSize
         self.refreshDots()
 
+    def setdotDensity(self, dotDensity):
+        self.dotDensity = dotDensity
+        self.refreshDots()
 
     def setnDots(self, nDots):
         self.nDots = nDots
@@ -190,7 +197,26 @@ class FixedDotStim(visual.DotStim):
 
     def refreshDots(self):
         """Callable user function to choose a new set of dots."""
+        # We first calculate the number of dots from the density
+        # this code take into account if a circle or a square is used as a shape
+        if self.fieldShape in (None, 'square', 'sqr'):
+            field_area = self.fieldSize[0] * self.fieldSize[1]
+        else:
+            field_area = np.pi * (self.fieldSize[0] / 2) ** 2
+
+        # We derive the number of dots from the field_area
+        self.nDots = int(np.ceil(self.dotDensity * field_area))
+
+        # We then calculate the number of dots from the field size
+        if self.dotSize is None:
+            self.dotSize = 3.0
         self.vertices = self._verticesBase = self._dotsXY = self._newDotsXY(self.nDots)
+
+        # all dots have the same speed
+        if self.nDots != len(self._dotsSpeed):
+            self._dotsSpeed = np.ones(self.nDots, dtype=float) * self.speed
+            self._dotsLife = np.abs(self.dotLife) * np.random.rand(self.nDots)
+            self._dotsDir = np.random.rand(self.nDots) * _2pi
 
         # Don't allocate another array if the new number of dots is equal to
         # the last.
@@ -320,14 +346,14 @@ def _calcEquilateralVertices(edges, radius=0.5):
 
 #,nDotsSqr,nDotsirc,
 # create a table with all the desired trials combination
-def set_trials_sqr(n_reps, direction_vec,InnerdirVec, coherence_level,DotSpeed,DotSize,FieldSizeSqr,FieldSizeCirc,nDotsSqr,nDotsirc,shuff=True):
+def set_trials_sqr(n_reps, direction_vec,InnerdirVec, coherence_level,DotSpeed,DotSize,FieldSizeSqr,FieldSizeCirc,dotDensitysSqr,dotDensitysirc,shuff=True):
     
     opacitycirc=[0,1]
     opacitysqr = [0,1]
     
-    combinations_with_fixed_opacity = list(itertools.product(direction_vec, InnerdirVec,[1], [1], coherence_level, DotSize, DotSpeed,FieldSizeSqr,FieldSizeCirc,nDotsSqr,nDotsirc,))
+    combinations_with_fixed_opacity = list(itertools.product(direction_vec, InnerdirVec,[1], [1], coherence_level, DotSize, DotSpeed,FieldSizeSqr,FieldSizeCirc,dotDensitysSqr,dotDensitysirc,))
 
-    combinations_with_variable_opacity = list(itertools.product(direction_vec, InnerdirVec, opacitycirc, opacitysqr, coherence_level, DotSize, DotSpeed,FieldSizeSqr,FieldSizeCirc,nDotsSqr,nDotsirc,))
+    combinations_with_variable_opacity = list(itertools.product(direction_vec, InnerdirVec, opacitycirc, opacitysqr, coherence_level, DotSize, DotSpeed,FieldSizeSqr,FieldSizeCirc,dotDensitysSqr,dotDensitysirc,))
     
     filtered_combinations_with_variable_opacity = []
     for combo in combinations_with_variable_opacity:
@@ -466,8 +492,8 @@ def callAccParameter(win
                      ,num_reps_ex
                      ,fieldSize_Circle
                      ,fieldSize_Square
-                     ,ndots_circ
-                     ,ndots_sqr
+                     ,dotDensity_circ
+                     ,dotDensity_sqr
                      ,sweep_params_circ
                      ,sweep_params_sqr
                      ):
@@ -478,7 +504,7 @@ def callAccParameter(win
         rdkCircle = init_dot_stim_circ(win
                     ,num_reps_ex
                     ,field_size=fieldSize_Circle
-                    ,n_dots=ndots_circ
+                    ,n_dots=1
                     ,field_shape='circle'
                     ,stim_name='rdkCircle'
                     ,sweep_params_exp_circ=sweep_params_circ
@@ -490,7 +516,7 @@ def callAccParameter(win
         rdkSqr = init_dot_stim(win
                     ,num_reps_ex
                     ,field_size=fieldSize_Square
-                    ,n_dots=ndots_sqr
+                    ,n_dots=1
                     ,field_shape='sqr'
                     ,stim_name='rdkSqr'
                     ,sweep_params_exp_sqr=sweep_params_sqr
@@ -513,8 +539,8 @@ def callAccParameter(win
             ,DotSpeed= sweep_params_sqr['speed'][0]
             ,FieldSizeSqr= sweep_params_sqr['fieldSize'][0]
             ,FieldSizeCirc= sweep_params_circ['fieldSize'][0]
-            ,nDotsSqr= sweep_params_sqr['nDots'][0]
-            ,nDotsirc= sweep_params_circ['nDots'][0]
+            ,dotDensitysSqr= sweep_params_sqr['dotDensity'][0]
+            ,dotDensitysirc= sweep_params_circ['dotDensity'][0]
             ,shuff=True
             ) 
         
@@ -548,22 +574,11 @@ def callAccParameter(win
         return both_stimuli    
     
 def main(): 
-    nDotsPer1SqrArea = 200
+    nDotsPer1SqrArea = [0.5]
     fieldSizeCircle = [5,20]
-    fieldSizeSquare = [100, 100]
-   # areaCircle = (fieldSizeCircle[0]/2)**2*np.pi
-  #  areaSquare = fieldSizeSquare[0]**2
-    
-   # nDotsCircle = int(round(areaCircle*nDotsPer1SqrArea))
-   # nDotsSquare =int(round(areaSquare*nDotsPer1SqrArea))
-   
-    nDotsCircle = 40
-    nDotsSquare = 800
-    
-    nDotsCircleSP = [nDotsCircle]
-    nDotsSquareSP = [nDotsSquare]
-    
-
+    fieldSizeSquare = [100, 100]   
+    dotDensitysCircle = nDotsPer1SqrArea
+    dotDensitysSquare = nDotsPer1SqrArea
     
     num_reps = 1
     #dirVec=[0, 45 ,90, 135, 180 ,225, 270 ,315]
@@ -583,7 +598,7 @@ def main():
                              ,'dotSize': (dotsize_vec,DOT_SIZE_IND)
                              ,'speed':(dotspeed_vec,SPEED_IND)
                              ,'fieldSize':(fieldSizeCircle,FIELD_SIZE_IND)
-                             ,'nDots':(nDotsCircleSP,NDOTS_IND)
+                             ,'dotDensity':(dotDensitysCircle,NDOTS_IND)
                              }
      
     sweep_params_exp_sqr = { 'Dir': (dirVecSqr, DIR_IND)
@@ -592,7 +607,7 @@ def main():
                             ,'dotSize': (dotsize_vec,DOT_SIZE_IND)
                             ,'speed':(dotspeed_vec,SPEED_IND)
                             ,'fieldSize':(fieldSizeSquare,FIELD_SIZE_IND)
-                            ,'nDots':(nDotsSquareSP,NDOTS_IND)
+                            ,'dotDensity':(dotDensitysSquare,NDOTS_IND)
                             } 
 
     # COHERENCE
@@ -605,8 +620,8 @@ def main():
             ,num_reps_ex=num_reps
             ,fieldSize_Circle=fieldSizeCircle
             ,fieldSize_Square=fieldSizeSquare
-            ,ndots_circ=nDotsCircle
-            ,ndots_sqr=nDotsSquare
+            ,dotDensity_circ=dotDensitysCircle
+            ,dotDensity_sqr=dotDensitysSquare
             ,sweep_params_circ=sweep_params_exp_circ
             ,sweep_params_sqr=sweep_params_exp_sqr
             )
@@ -625,8 +640,8 @@ def main():
             ,num_reps_ex=num_reps
             ,fieldSize_Circle=fieldSizeCircle
             ,fieldSize_Square=fieldSizeSquare
-            ,ndots_circ=nDotsCircle
-            ,ndots_sqr=nDotsSquare
+            ,dotDensity_circ=dotDensitysCircle
+            ,dotDensity_sqr=dotDensitysSquare
             ,sweep_params_circ=sweep_params_exp_circ
             ,sweep_params_sqr=sweep_params_exp_sqr
             )
@@ -644,8 +659,8 @@ def main():
             ,num_reps_ex=num_reps
             ,fieldSize_Circle=fieldSizeCircle
             ,fieldSize_Square=fieldSizeSquare
-            ,ndots_circ=nDotsCircle
-            ,ndots_sqr=nDotsSquare
+            ,dotDensity_circ=dotDensitysCircle
+            ,dotDensity_sqr=dotDensitysSquare
             ,sweep_params_circ=sweep_params_exp_circ
             ,sweep_params_sqr=sweep_params_exp_sqr
             )
