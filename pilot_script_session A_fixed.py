@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
 """
+Created on Wed Jun 19 22:25:19 2024
+
+@author: user
+"""
+
+# -*- coding: utf-8 -*-
+"""
 Created on Wed Jun 19 09:14:35 2024
 
 @author: user
@@ -511,8 +518,8 @@ def callAccParameter(win
                      ,num_reps_ex
                      ,fieldSize_Circle
                      ,fieldSize_Square
-                     ,dotDensity_circ
-                     ,dotDensity_sqr
+                    # ,dotDensity_circ
+                     #,dotDensity_sqr
                      ,sweep_params_circ
                      ,sweep_params_sqr
                      ):
@@ -575,7 +582,7 @@ def callAccParameter(win
         rdkSqr.sweep_order = sweepOrderSqr
         rdkCircle.sweep_order = sweepOrderCirc
 
-        list_diameters = np.array([[(float(indiv_sweep[5])),(float(indiv_sweep[5]))] for indiv_sweep in rdkCircle.sweep_table])
+        list_diameters = np.array([[(float(indiv_sweep[FIELD_SIZE_IND])),(float(indiv_sweep[FIELD_SIZE_IND]))] for indiv_sweep in rdkCircle.sweep_table])
         list_opacity = np.array([(float(indiv_sweep[OPACITY_IND])) for indiv_sweep in rdkCircle.sweep_table])
 
         sweep_params_background_circle = { 'Size': (list_diameters[np.array(rdkCircle.sweep_order)], 0),
@@ -605,46 +612,51 @@ def callAccParameter(win
         
         return both_stimuli    
     
-def createBlock(Blockparamter,
-                BlockparamterName,
-                BlockparameterInd,
-                sweep_params_exp_sqr,
-                sweep_params_exp_circ   
-                ,fieldSizeCircle
-                ,fieldSizeSquare
-                ,dotDensitysCircle
-                ,dotDensitysSquare
-                ,num_reps):
+def  createBlock(blockParameter
+                    ,blockParameterName
+                    ,blockParameterInd
+                    ,sweep_params_int_sqr
+                    ,sweep_params_int_circ
+                    ,fieldSizeCircle
+                    ,fieldSizeSquare
+                    ,dotDensitysCircle
+                    ,dotDensitysSquare
+                    ,num_reps):
     
-         sweep_params_exp_sqr[BlockparamterName] = (Blockparamter,BlockparameterInd)
-         sweep_params_exp_circ[BlockparamterName] = (Blockparamter,BlockparameterInd)
-         
-         BlockStim = callAccParameter(win
-            ,num_reps_ex=num_reps
-            ,fieldSize_Circle=fieldSizeCircle
-            ,fieldSize_Square=fieldSizeSquare
-            ,dotDensity_circ=dotDensitysCircle
-            ,dotDensity_sqr=dotDensitysSquare
-            ,sweep_params_circ=sweep_params_exp_circ
-            ,sweep_params_sqr=sweep_params_exp_sqr
-            )
-         
-         return BlockStim   
+    
+        sweep_params_int_circ[blockParameterName] =( blockParameter,blockParameterInd)
+        sweep_params_int_circ[blockParameterName] =( blockParameter,blockParameterInd)
+
+        both_block= callAccParameter(win
+                                     ,num_reps_ex=num_reps
+                                     ,fieldSize_Circle=fieldSizeCircle
+                                     ,fieldSize_Square=fieldSizeSquare
+                                     ,dotDensity_circ=dotDensitysCircle
+                                     ,dotDensity_sqr=dotDensitysSquare
+                                     ,sweep_params_circ=sweep_params_int_circ
+                                     ,sweep_params_sqr=sweep_params_int_sqr
+                                     )
+        return both_block
+        
+        
+    
     
 
     
 def main(): 
-    nDotsPer1SqrArea = [0.5]
+    nDotsPer1SqrArea = [0.9999]
     #fieldSizeCircle = [5,20,40]
    # fieldSizeSquare = [100,100,100]  
-    fieldSizeCircle = [20]
+    fieldSizeCircle = [15]
     fieldSizeSquare = [100]
     dotDensitysCircle = nDotsPer1SqrArea
     dotDensitysSquare = nDotsPer1SqrArea
+    #dotDensitysCircle = [0.99]
+   # dotDensitysSquare =[ 1]
     
     num_reps = 1
     #dirVec=[0, 45 ,90, 135, 180 ,225, 270 ,315]
-    opacity_vec = [1,0]
+    opacity_vec = [0,1]
     dirVecCirc = [0,180]
     dirVecSqr =[0,180,90]
     coherence_vec = [1]
@@ -661,18 +673,18 @@ def main():
 #     nDotsSquare =int(round(areaSquare*nDotsPer1SqrArea))
 
     
-    sweep_params_exp_circ = { 'Dir': (dirVecCirc, DIR_IND)
+    sweep_params_int_circ = { 'Dir': (dirVecCirc, DIR_IND)
                              ,'opacity': (opacity_vec,OPACITY_IND)
-                             ,'FieldCoherence': ([1], COHERENCE_IND)
+                             ,'FieldCoherence': (coherence_vec, COHERENCE_IND)
                              ,'dotSize': (dotsize_vec,DOT_SIZE_IND)
                              ,'speed':(dotspeed_vec,SPEED_IND)
                              ,'fieldSize':(fieldSizeCircle,FIELD_SIZE_IND)
                              ,'dotDensity':(dotDensitysCircle,NDOTS_IND)
                              }
      
-    sweep_params_exp_sqr = { 'Dir': (dirVecSqr, DIR_IND)
+    sweep_params_int_sqr = { 'Dir': (dirVecSqr, DIR_IND)
                             ,'opacity': (opacity_vec,OPACITY_IND)
-                            ,'FieldCoherence': ([1], COHERENCE_IND)
+                            ,'FieldCoherence': (coherence_vec, COHERENCE_IND)
                             ,'dotSize': (dotsize_vec,DOT_SIZE_IND)
                             ,'speed':(dotspeed_vec,SPEED_IND)
                             ,'fieldSize':(fieldSizeSquare,FIELD_SIZE_IND)
@@ -684,96 +696,28 @@ def main():
             ,num_reps_ex=num_reps
             ,fieldSize_Circle=fieldSizeCircle
             ,fieldSize_Square=fieldSizeSquare
-            ,dotDensity_circ=dotDensitysCircle
-            ,dotDensity_sqr=dotDensitysSquare
-            ,sweep_params_circ=sweep_params_exp_circ
-            ,sweep_params_sqr=sweep_params_exp_sqr
+           # ,dotDensity_circ=dotDensitysCircle
+           # ,dotDensity_sqr=dotDensitysSquare
+            ,sweep_params_circ=sweep_params_int_circ
+            ,sweep_params_sqr=sweep_params_int_sqr
             )
      
-#    
-#    
-#     coherence_vec_exp = [1,0.5,0.3,0.25,0.2,0.15,0.1,0]
-#
-#     sweep_params_exp_circ_coher = { 'Dir': (dirVecCirc, DIR_IND)
-#                             ,'opacity': (opacity_vec,OPACITY_IND)
-#                             ,'FieldCoherence': (coherence_vec_exp, COHERENCE_IND)
-#                             ,'dotSize': (dotsize_vec,DOT_SIZE_IND)
-#                             ,'speed':(dotspeed_vec,SPEED_IND)
-#                             ,'fieldSize':(fieldSizeCircle,FIELD_SIZE_IND)
-#                             ,'dotDensity':(dotDensitysCircle,NDOTS_IND)
-#                             }
-#     
-#    sweep_params_exp_sqr_coher = { 'Dir': (dirVecSqr, DIR_IND)
-#                            ,'opacity': (opacity_vec,OPACITY_IND)
-#                            ,'FieldCoherence': (coherence_vec_exp, COHERENCE_IND)
-#                            ,'dotSize': (dotsize_vec,DOT_SIZE_IND)
-#                            ,'speed':(dotspeed_vec,SPEED_IND)
-#                            ,'fieldSize':(fieldSizeSquare,FIELD_SIZE_IND)
-#                            ,'dotDensity':(dotDensitysSquare,NDOTS_IND)
-#                            } 
-#    
-#    
-#    dotspeed_vec_exp = [0.05,0.1,0.2,0.4,0.8]
-#
-#    sweep_params_exp_circ_speed = { 'Dir': (dirVecCirc, DIR_IND)
-#                             ,'opacity': (opacity_vec,OPACITY_IND)
-#                             ,'FieldCoherence': (coherence_vec, COHERENCE_IND)
-#                             ,'dotSize': (dotsize_vec,DOT_SIZE_IND)
-#                             ,'speed':(dotspeed_vec_exp,SPEED_IND)
-#                             ,'fieldSize':(fieldSizeCircle,FIELD_SIZE_IND)
-#                             ,'dotDensity':(dotDensitysCircle,NDOTS_IND)
-#                             }
-#     
-#    sweep_params_exp_sqr_speed = { 'Dir': (dirVecSqr, DIR_IND)
-#                            ,'opacity': (opacity_vec,OPACITY_IND)
-#                            ,'FieldCoherence': (coherence_vec, COHERENCE_IND)
-#                            ,'dotSize': (dotsize_vec,DOT_SIZE_IND)
-#                            ,'speed':(dotspeed_vec_exp,SPEED_IND)
-#                            ,'fieldSize':(fieldSizeSquare,FIELD_SIZE_IND)
-#                            ,'dotDensity':(dotDensitysSquare,NDOTS_IND)
-#                            } 
-#    
-#    
-#    
-#    
-#    fieldSizeCircle_exp = [10,15,25,45]
-#    fieldSizeSquare_exp  = [100,100,100,100]
-#    
-#    sweep_params_exp_circ_fieldsize = { 'Dir': (dirVecCirc, DIR_IND)
-#                             ,'opacity': (opacity_vec,OPACITY_IND)
-#                             ,'FieldCoherence': (coherence_vec, COHERENCE_IND)
-#                             ,'dotSize': (dotsize_vec,DOT_SIZE_IND)
-#                             ,'speed':(dotspeed_vec,SPEED_IND)
-#                             ,'fieldSize':(fieldSizeCircle_exp,FIELD_SIZE_IND)
-#                             ,'dotDensity':(dotDensitysCircle,NDOTS_IND)
-#                             }
-#     
-#    sweep_params_exp_sqr_fieldsize = { 'Dir': (dirVecSqr, DIR_IND)
-#                            ,'opacity': (opacity_vec,OPACITY_IND)
-#                            ,'FieldCoherence': (coherence_vec, COHERENCE_IND)
-#                            ,'dotSize': (dotsize_vec,DOT_SIZE_IND)
-#                            ,'speed':(dotspeed_vec,SPEED_IND)
-#                            ,'fieldSize':(fieldSizeSquare_exp,FIELD_SIZE_IND)
-#                            ,'dotDensity':(dotDensitysSquare,NDOTS_IND)
-#                            } 
-#    
-#    
-#    
+
 #    
 #
 #
 #    # COHERENCE
-#    coherence_vec_exp = [1,0.5,0.3,0.25,0.2,0.15,0.1,0]
-#    both_stimuli_coherence = createBlock(coherence_vec_exp,
-#                                         'FieldCoherence'
-#                                         ,COHERENCE_IND
-#                                         ,sweep_params_exp_sqr
-#                                         ,sweep_params_exp_circ
-#                                         ,fieldSizeCircle
-#                                         ,fieldSizeSquare
-#                                         ,dotDensitysCircle
-#                                         ,dotDensitysSquare
-#                                         ,num_reps)
+    coherence_vec_exp = [1,0.5,0.3,0.25,0.2,0.15,0.1,0]
+    both_stimuli_coherence = createBlock(coherence_vec_exp,
+                                         'FieldCoherence'
+                                         ,COHERENCE_IND
+                                         ,sweep_params_int_sqr
+                                         ,sweep_params_int_circ
+                                         ,fieldSizeCircle
+                                         ,fieldSizeSquare
+                                         ,dotDensitysCircle
+                                         ,dotDensitysSquare
+                                         ,num_reps)
 #    
 #    sweep_params_exp_circ = { 'Dir': (dirVecCirc, DIR_IND)
 #                             ,'opacity': (opacity_vec,OPACITY_IND)
@@ -797,45 +741,72 @@ def main():
 #    
 #    
 #    
-#    dotspeed_vec_exp = [0.05,0.1,0.2,0.4,0.8]
-#    both_stimuli_speed = createBlock(dotspeed_vec_exp,
-#                                         'speed'
-#                                         ,SPEED_IND
-#                                         ,sweep_params_exp_sqr
-#                                         ,sweep_params_exp_circ
-#                                         ,fieldSizeCircle
-#                                         ,fieldSizeSquare
-#                                         ,dotDensitysCircle
-#                                         ,dotDensitysSquare
-#                                         ,num_reps)
-#    
-#    
-#    sweep_params_exp_circ = { 'Dir': (dirVecCirc, DIR_IND)
-#                             ,'opacity': (opacity_vec,OPACITY_IND)
-#                             ,'FieldCoherence': (coherence_vec, COHERENCE_IND)
-#                             ,'dotSize': (dotsize_vec,DOT_SIZE_IND)
-#                             ,'speed':(dotspeed_vec,SPEED_IND)
-#                             ,'fieldSize':(fieldSizeCircle,FIELD_SIZE_IND)
-#                             ,'dotDensity':(dotDensitysCircle,NDOTS_IND)
-#                             }
-#     
-#    sweep_params_exp_sqr = { 'Dir': (dirVecSqr, DIR_IND)
-#                            ,'opacity': (opacity_vec,OPACITY_IND)
-#                            ,'FieldCoherence': (coherence_vec, COHERENCE_IND)
-#                            ,'dotSize': (dotsize_vec,DOT_SIZE_IND)
-#                            ,'speed':(dotspeed_vec,SPEED_IND)
-#                            ,'fieldSize':(fieldSizeSquare,FIELD_SIZE_IND)
-#                            ,'dotDensity':(dotDensitysSquare,NDOTS_IND)
-#                            } 
-#    
-    
-  
+    dotspeed_vec_exp = [0.05,0.1,0.2,0.4,0.8]
+    both_stimuli_speed = createBlock(dotspeed_vec_exp,
+                                         'speed'
+                                         ,SPEED_IND
+                                         ,sweep_params_int_sqr
+                                         ,sweep_params_int_circ
+                                         ,fieldSizeCircle
+                                         ,fieldSizeSquare
+                                         ,dotDensitysCircle
+                                         ,dotDensitysSquare
+                                         ,num_reps)
     
     
-   # sweep_params_exp_sqr['FieldCoherence'] = (coherence_vec_exp,COHERENCE_IND)
-    #sweep_params_exp_circ['FieldCoherence'] = (coherence_vec_exp,COHERENCE_IND)
+    
+    
+    #    
+#     # DOT fieldsize
+    fieldSizeCircle_exp = [10,15,25,45]
+    fieldSizeSquare_exp  = [100]
+    
+    sweep_params_int_circ['fieldSize'] =( fieldSizeCircle_exp,FIELD_SIZE_IND)
+    sweep_params_int_sqr['fieldSize'] =( fieldSizeSquare_exp,FIELD_SIZE_IND)
 
-    
+
+
+  #  sweep_params_exp_sqr['FieldCoherence'] = (coherence_vec,COHERENCE_IND)
+  #  sweep_params_exp_circ['FieldCoherence'] = (coherence_vec,COHERENCE_IND)           
+
+    both_stimuli_Fieldsize= callAccParameter(win
+                                             ,num_reps_ex=num_reps
+                                             ,fieldSize_Circle=fieldSizeCircle
+                                             ,fieldSize_Square=fieldSizeSquare
+                                             ,dotDensity_circ=dotDensitysCircle
+                                             ,dotDensity_sqr=dotDensitysSquare
+                                             ,sweep_params_circ=sweep_params_int_circ
+                                             ,sweep_params_sqr=sweep_params_int_sqr
+                                             )
+##    
+#
+#    
+#    sweep_params_exp_circ = { 'Dir': (dirVecCirc, DIR_IND)
+#                             ,'opacity': (opacity_vec,OPACITY_IND)
+#                             ,'FieldCoherence': (coherence_vec, COHERENCE_IND)
+#                             ,'dotSize': (dotsize_vec,DOT_SIZE_IND)
+#                             ,'speed':(dotspeed_vec,SPEED_IND)
+#                             ,'fieldSize':(fieldSizeCircle,FIELD_SIZE_IND)
+#                             ,'dotDensity':(dotDensitysCircle,NDOTS_IND)
+#                             }
+#     
+#    sweep_params_exp_sqr = { 'Dir': (dirVecSqr, DIR_IND)
+#                            ,'opacity': (opacity_vec,OPACITY_IND)
+#                            ,'FieldCoherence': (coherence_vec, COHERENCE_IND)
+#                            ,'dotSize': (dotsize_vec,DOT_SIZE_IND)
+#                            ,'speed':(dotspeed_vec,SPEED_IND)
+#                            ,'fieldSize':(fieldSizeSquare,FIELD_SIZE_IND)
+#                            ,'dotDensity':(dotDensitysSquare,NDOTS_IND)
+#                            } 
+#    
+#    
+#  
+#    
+#    
+#    sweep_params_exp_sqr['FieldCoherence'] = (coherence_vec_exp,COHERENCE_IND)
+#    sweep_params_exp_circ['FieldCoherence'] = (coherence_vec_exp,COHERENCE_IND)
+#
+#    
 #    both_stimuli_coherence = callAccParameter(win
 #            ,num_reps_ex=num_reps
 #            ,fieldSize_Circle=fieldSizeCircle
@@ -845,8 +816,8 @@ def main():
 #            ,sweep_params_circ=sweep_params_exp_circ
 #            ,sweep_params_sqr=sweep_params_exp_sqr
 #            )
-                                           
-    # DOT SPEED
+#                                           
+#     DOT SPEED
 #    dotspeed_vec_exp = [0.05,0.1,0.2,0.4,0.8]  
 #    sweep_params_exp_sqr['speed'] = (dotspeed_vec_exp,SPEED_IND)
 #    sweep_params_exp_circ['speed'] = (dotspeed_vec_exp,SPEED_IND)
