@@ -554,15 +554,26 @@ def callAccParameter(win
         rdkSqr.sweep_order = sweepOrderSqr
         rdkCircle.sweep_order = sweepOrderCirc
 
-        # nb_sweeps = len(rdkSqr.sweep_order)
         list_diameters = np.array([[(float(indiv_sweep[5])),(float(indiv_sweep[5]))] for indiv_sweep in rdkCircle.sweep_table])
-        sweep_params_background_circle = { 'Size': (list_diameters[np.array(rdkCircle.sweep_order)], 0)}
+        list_opacity = np.array([(float(indiv_sweep[OPACITY_IND])) for indiv_sweep in rdkCircle.sweep_table])
+
+        sweep_params_background_circle = { 'Size': (list_diameters[np.array(rdkCircle.sweep_order)], 0),
+                                           'Opacity': ([1.0], 1)}
+    
         circle = init_circle(win
                 ,r=10
                 ,repetitions=1
                 ,sweep_param = sweep_params_background_circle
                 )
         
+
+        # We merge list_diameters and list_opacity into a single list where each element is a tuple of the form (diameters, opacity)
+        list_circle = zip(list_diameters[np.array(rdkCircle.sweep_order)].tolist(), list_opacity[np.array(rdkCircle.sweep_order)].tolist())
+        circle.sweep_table = list_circle
+
+        # sweep order is the order in list_circle
+        circle.sweep_order = np.arange(len(list_circle))
+
         list_stimuli.append(rdkSqr)
         list_stimuli.append(circle)
         list_stimuli.append(rdkCircle)
