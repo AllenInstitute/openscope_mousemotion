@@ -1,7 +1,7 @@
 
 
 import camstim
-from psychopy import visual, event, core, monitors
+from psychopy import visual, monitors
 import numpy as np
 import random
 from camstim import SweepStim,  Foraging
@@ -9,9 +9,9 @@ from camstim.sweepstim import StimulusArray
 from camstim.sweepstim import Stimulus
 import itertools
 from psychopy.tools.arraytools import val2array
-
 from camstim import Window, Warp
 
+# All CONSTANTS below are NOT to be changed
 DIR_IND = 0
 OPACITY_IND = 1
 COHERENCE_IND = 2
@@ -19,9 +19,6 @@ DOT_SIZE_IND = 3
 SPEED_IND = 4
 FIELD_SIZE_IND = 5
 NDOTS_IND = 6
-
-
-
 DIR_CIRC_IND_TRIAL = 1
 DIR_SQR_IND_TRIAL  = 0
 OPACITY_SQR_IND_TRIAL  = 2
@@ -31,47 +28,15 @@ DOT_SIZE_IND_TRIAL = 5
 SPEED_IND_TRIAL = 6
 FIELD_SIZE_SQR_IND_TRIAL = 7
 FIELD_SIZE_CIRC_IND_TRIAL = 8
-
-DOTSDensity_SQR_IND_TRIAL = 9
-DOTSDensity_CIRC_IND_TRIAL = 10
-
-
-NUM_REPS = 1
-coherence_vec = 1
-
-dev_mode = True
-if dev_mode:
-    my_monitor = monitors.Monitor(name='Test')
-    my_monitor.setSizePix((1280,800))
-    my_monitor.setWidth(20)
-    my_monitor.setDistance(15)
-    my_monitor.saveMon()
-    win = Window(size=[1024,768],
-        fullscr=False,
-        screen=0,
-        monitor= my_monitor,
-        warp=Warp.Spherical,
-        color= "black"
-       # units='deg'
-    )
-else: 
-    win = Window(
-        fullscr=True,
-        screen=1,
-        monitor='Gamma1.Luminance50',
-        warp=Warp.Spherical,
-        units ='deg'
-    )
-
-# some constants
-_piOver2 = np.pi / 2.
-_piOver180 = np.pi / 180.
-_2pi = 2 * np.pi
-
-sweep_length_num       = 1
-start_time_nun          = 0
-blank_length_num        = 0.5 
-blank_sweeps_num        = 0
+DOTSDENSITY_SQR_IND_TRIAL = 9
+DOTSDENSITY_CIRC_IND_TRIAL = 10
+SWEEP_LENGTH_NUM       = 1
+START_TIME_NUM          = 0
+BLANK_LENGTH_NUM        = 0.5 
+BLANK_SWEEPS_NUM        = 0
+PIOVER2 = np.pi / 2.
+PIOVER180 = np.pi / 180.
+PI_2 = 2 * np.pi
 
 
 # The following fixes the issue with the dots not being created on the edges of the screen. 
@@ -83,6 +48,8 @@ class FixedDotStim(visual.DotStim):
         # Initialize the dots density
         self.dotDensity = 1.0
         
+        self.background_color = kwargs.pop('background_color', None)
+
         super(FixedDotStim, self).__init__(*args, **kwargs)
         # This is needed to avoid bar of dots. 
         self.refreshDots()
@@ -110,7 +77,7 @@ class FixedDotStim(visual.DotStim):
         """
         if self.fieldShape == 'circle':
             length = np.sqrt(np.random.uniform(0, 1, (nDots,)))
-            angle = np.random.uniform(0., _2pi, (nDots,))
+            angle = np.random.uniform(0., PI_2, (nDots,))
 
             newDots = np.zeros((nDots, 2))
             newDots[:, 0] = length * np.cos(angle)
@@ -150,7 +117,18 @@ class FixedDotStim(visual.DotStim):
         self.nDots = nDots
         self.refreshDots()
         
+    def _selectWindow(self, win):
+        """We modify this function to change background color of the window on the first draw."""
+
+        # We first call the parent class method
+        super(FixedDotStim, self)._selectWindow(win)
+
         
+        if self.background_color is not None:
+            if self.background_color != win.color:
+                self.old_background_color = win.color
+                win.color = self.background_color
+
     # updating the position of the dots for the square apparatus according to the direction of the movement
     def getRandPosInSquareSide(self,sideNum):
         xy = np.zeros((1, 2))
@@ -175,9 +153,9 @@ class FixedDotStim(visual.DotStim):
         newDots = np.zeros((nOutOfBounds, 2))
         if self.fieldShape=='sqr':
             for i in range(nOutOfBounds):
-                currDir = allDir[i]%_2pi
-                modAngle = currDir % _piOver2
-                side = currDir//_piOver2
+                currDir = allDir[i]%PI_2
+                modAngle = currDir % PIOVER2
+                side = currDir//PIOVER2
                 oddsInFirstSide = 1/(1+np.tan(modAngle))
                 isIn2ndSide = np.random.rand()>=oddsInFirstSide
                 sideEnter = (side+isIn2ndSide) % 4; #which of 4 sides of the square a new dot enters
@@ -185,7 +163,7 @@ class FixedDotStim(visual.DotStim):
             return newDots
         elif self.fieldShape=='circle':
             for i in range(nOutOfBounds):
-                currDir = allDir[i]%_2pi
+                currDir = allDir[i]%PI_2
                 entryAngle = currDir+np.pi
                 ShiftFromEntryAngleOnEdge = np.arcsin(np.random.uniform(-1, 1, size = None))
                 angleEntryOnCircEdge = entryAngle+ShiftFromEntryAngleOnEdge
@@ -214,7 +192,7 @@ class FixedDotStim(visual.DotStim):
         if self.nDots != len(self._dotsSpeed):
             self._dotsSpeed = np.ones(self.nDots, dtype=float) * self.speed
             self._dotsLife = np.abs(self.dotLife) * np.random.rand(self.nDots)
-            self._dotsDir = np.random.rand(self.nDots) * _2pi
+            self._dotsDir = np.random.rand(self.nDots) * PI_2
 
         # Don't allocate another array if the new number of dots is equal to
         # the last.
@@ -244,14 +222,14 @@ class FixedDotStim(visual.DotStim):
             # noise and signal dots change identity constantly
             np.random.shuffle(self._dotsDir)
             # and then update _signalDots from that
-            self._signalDots = (self._dotsDir == (self.dir * _piOver180))
+            self._signalDots = (self._dotsDir == (self.dir * PIOVER180))
 
         # update the locations of signal and noise; 0 radians=East!
         reshape = np.reshape
         if self.noiseDots == 'walk':
             # noise dots are ~self._signalDots
             sig = np.random.rand(np.sum(~self._signalDots))
-            self._dotsDir[~self._signalDots] = sig * _2pi
+            self._dotsDir[~self._signalDots] = sig * PI_2
             # then update all positions from dir*speed
             cosDots = reshape(np.cos(self._dotsDir), (self.nDots,))
             sinDots = reshape(np.sin(self._dotsDir), (self.nDots,))
@@ -305,42 +283,6 @@ class FixedDotStim(visual.DotStim):
         # update the pixel XY coordinates in pixels (using _BaseVisual class)
         self._updateVertices()
 
-# The functions below are necessary to generate the dots in the circle with older version of psychopy
-def _calculateMinEdges(lineWidth, threshold=180):
-    """
-    Calculate how many points are needed in an equilateral polygon for the gap between line rects to be < 1px and
-    for corner angles to exceed a threshold.
-
-    In other words, how many edges does a polygon need to have to appear smooth?
-
-    lineWidth : int, float, np.ndarray
-        Width of the line in pixels
-
-    threshold : int
-        Maximum angle (degrees) for corners of the polygon, useful for drawing a circle. Supply 180 for no maximum
-        angle.
-    """
-    # sin(theta) = opp / hyp, we want opp to be 1/8 (meaning gap between rects is 1/4px, 1/2px in retina)
-    opp = 1.0/8
-    hyp = lineWidth / 2
-    thetaR = np.arcsin(opp / hyp)
-    theta = np.degrees(thetaR)    
-    # If theta is below threshold, use threshold instead
-    theta = min(theta, threshold / 2)
-    # Angles in a shape add up to 360, so theta is 360/2n, solve for n
-    return int((360 / theta) / 2)
-
-def _calcEquilateralVertices(edges, radius=0.5):
-    """
-    Get vertices for an equilateral shape with a given number of sides, will assume radius is 0.5 (relative) but
-    can be manually specified
-    """
-    d = np.pi * 2.0 / edges
-    vertices = np.asarray(
-        [np.asarray((np.sin(e * d), np.cos(e * d))) * radius
-            for e in range(int(round(edges)))])
-    return vertices
-
 
 #,nDotsSqr,nDotsirc,
 # create a table with all the desired trials combination
@@ -392,15 +334,13 @@ def set_trials_sqr(n_reps, direction_vec,InnerdirVec, coherence_level,DotSpeed,D
     return(all_trials)
 
 
-
-
-#NDOTS_CIRC_IND_TRIAL
-    #NDOTS_SQR_IND_TRIAL
+# NDOTS_CIRC_IND_TRIAL
+# NDOTS_SQR_IND_TRIAL
 # set a similar order for the trials the dorCirc and dotSqr
 def set_new_trial_orders (alltrial, circTable, sqrTable):
 
-    circIndices = [DIR_CIRC_IND_TRIAL,OPACITY_CIRC_IND_TRIAL,COHERENCE_IND_TRIAL,DOT_SIZE_IND_TRIAL,SPEED_IND_TRIAL,FIELD_SIZE_CIRC_IND_TRIAL,DOTSDensity_CIRC_IND_TRIAL]
-    sqrIndices = [DIR_SQR_IND_TRIAL,OPACITY_SQR_IND_TRIAL,COHERENCE_IND_TRIAL,DOT_SIZE_IND_TRIAL,SPEED_IND_TRIAL,FIELD_SIZE_SQR_IND_TRIAL,DOTSDensity_SQR_IND_TRIAL]
+    circIndices = [DIR_CIRC_IND_TRIAL,OPACITY_CIRC_IND_TRIAL,COHERENCE_IND_TRIAL,DOT_SIZE_IND_TRIAL,SPEED_IND_TRIAL,FIELD_SIZE_CIRC_IND_TRIAL,DOTSDENSITY_CIRC_IND_TRIAL]
+    sqrIndices = [DIR_SQR_IND_TRIAL,OPACITY_SQR_IND_TRIAL,COHERENCE_IND_TRIAL,DOT_SIZE_IND_TRIAL,SPEED_IND_TRIAL,FIELD_SIZE_SQR_IND_TRIAL,DOTSDENSITY_SQR_IND_TRIAL]
 
     sweepOrderCirc = list(range(0, len(alltrial)))
     sweepOrderSqr = list(range(0, len(alltrial)))
@@ -425,10 +365,18 @@ def set_new_trial_orders (alltrial, circTable, sqrTable):
 
     return(sweepOrderCirc_all,sweepOrderSqr_all)
 
-#field_size
-
 # set dotSqr
-def init_dot_stim(window,num_reps,field_size, n_dots,coher,field_shape, stim_name,sweep_params_exp_sqr):
+def init_dot_stim(window,
+                  num_reps,
+                  field_size, 
+                  n_dots,
+                  coher,
+                  field_shape, 
+                  stim_name,
+                  sweep_params_exp_sqr, 
+                  background_color=None, 
+                  dot_color=(255,255,255)
+                  ):
 #{ 'Dir': (dirVec, 0), 'FieldCoherence': (coherence_vec, 1),'dotSize': (dotsize_vec,2)}
     dot_stimuli = Stimulus(FixedDotStim(window, nDots=int(n_dots), 
                                         fieldPos=(0,0), units='deg',
@@ -436,18 +384,20 @@ def init_dot_stim(window,num_reps,field_size, n_dots,coher,field_shape, stim_nam
                                         fieldShape=field_shape,
                                         dir=90, coherence =coher,
                                         dotLife=-1, speed=0.01,  
-                                        rgb=None, color=(255,255,255), 
+                                        rgb=None, color=dot_color, 
                                         colorSpace='rgb255', opacity=1.0,
                                         contrast=1.0, depth=0, element=None, 
                                         signalDots='same', 
                                         noiseDots='direction', name='', 
-                                        autoLog=True),
+                                        autoLog=True,
+                                        background_color=background_color
+                                        ),
                             
                             sweep_params = sweep_params_exp_sqr,
-                            sweep_length       = sweep_length_num,
-                            start_time          = start_time_nun,
-                            blank_length        = blank_length_num, 
-                            blank_sweeps        = blank_sweeps_num,
+                            sweep_length       = SWEEP_LENGTH_NUM,
+                            start_time          = START_TIME_NUM,
+                            blank_length        = BLANK_LENGTH_NUM, 
+                            blank_sweeps        = BLANK_SWEEPS_NUM,
                             runs                = num_reps,
                             shuffle             = True,
                            
@@ -456,25 +406,39 @@ def init_dot_stim(window,num_reps,field_size, n_dots,coher,field_shape, stim_nam
 
     return dot_stimuli
 
+
 # set dotCirc
-def init_dot_stim_circ(window,num_reps,field_size, n_dots,coher,field_shape, stim_name,sweep_params_exp_circ):
+def init_dot_stim_circ(window,
+                       num_reps,
+                       field_size, 
+                       n_dots,
+                       coher,
+                       field_shape, 
+                       stim_name,
+                       sweep_params_exp_circ, 
+                       background_color=None, 
+                       dot_color=(255,255,255),
+                       vertical_pos = 8
+                       ):
     dot_stimuli_circ = Stimulus(FixedDotStim(window, nDots=int(n_dots), 
-                                         fieldPos=(0,8), units='deg',
+                                         fieldPos=(0,vertical_pos), units='deg',
                                          fieldSize=(field_size[0], field_size[0]),
                                          fieldShape=field_shape, 
                                          dir=90, coherence =coher,
                                          dotLife=-1, speed=0.01,
-                                         rgb=None, color=(255,255,255), 
+                                         rgb=None, color=dot_color, 
                                          colorSpace='rgb255', opacity=1.0,
                                          contrast=1.0, depth=0, element=None, 
                                          signalDots='same', 
                                          noiseDots='direction', name='', 
-                                         autoLog=True),
+                                         autoLog=True,
+                                         background_color=background_color  
+                                         ),
                             sweep_params        = sweep_params_exp_circ,
-                            sweep_length        = sweep_length_num,
-                            start_time          = start_time_nun,
-                            blank_length        = blank_length_num,
-                            blank_sweeps        = blank_sweeps_num,
+                            sweep_length        = SWEEP_LENGTH_NUM,
+                            start_time          = START_TIME_NUM,
+                            blank_length        = BLANK_LENGTH_NUM,
+                            blank_sweeps        = BLANK_SWEEPS_NUM,
                             runs                = num_reps,
                             shuffle             = True,
                             )
@@ -485,34 +449,73 @@ def init_dot_stim_circ(window,num_reps,field_size, n_dots,coher,field_shape, sti
 
 
 # set constant circ 
-def init_circle(window, r=20, repetitions=10, sweep_param = {}):
+def init_circle(win, r=20, repetitions=10, sweep_param = {}, color='black', vertical_pos = 8):
+    # The functions below are necessary to generate the dots in the circle with older version of psychopy
+    
+    def _calculateMinEdges(lineWidth, threshold=180):
+        """
+        Calculate how many points are needed in an equilateral polygon for the gap between line rects to be < 1px and
+        for corner angles to exceed a threshold.
+
+        In other words, how many edges does a polygon need to have to appear smooth?
+
+        lineWidth : int, float, np.ndarray
+            Width of the line in pixels
+
+        threshold : int
+            Maximum angle (degrees) for corners of the polygon, useful for drawing a circle. Supply 180 for no maximum
+            angle.
+        """
+        # sin(theta) = opp / hyp, we want opp to be 1/8 (meaning gap between rects is 1/4px, 1/2px in retina)
+        opp = 1.0/8
+        hyp = lineWidth / 2
+        thetaR = np.arcsin(opp / hyp)
+        theta = np.degrees(thetaR)    
+        # If theta is below threshold, use threshold instead
+        theta = min(theta, threshold / 2)
+        # Angles in a shape add up to 360, so theta is 360/2n, solve for n
+        return int((360 / theta) / 2)
+
+
+    def _calcEquilateralVertices(edges, radius=0.5):
+        """
+        Get vertices for an equilateral shape with a given number of sides, will assume radius is 0.5 (relative) but
+        can be manually specified
+        """
+        d = np.pi * 2.0 / edges
+        vertices = np.asarray(
+            [np.asarray((np.sin(e * d), np.cos(e * d))) * radius
+                for e in range(int(round(edges)))])
+        return vertices
+
     circle = visual.ShapeStim(
         win, vertices= _calcEquilateralVertices(_calculateMinEdges(1.5, threshold=5)),
-        pos=(0,8), size=(r*2, r*2), units="deg",
-        interpolate=True, fillColor="black",
+        pos=(0,vertical_pos), size=(r*2, r*2), units="deg",
+        interpolate=True, fillColor=color,
         autoDraw=False, lineWidth=0, lineColor="black")
+    
     circle_in_stim = Stimulus(circle, 
              sweep_params = sweep_param, 
-             sweep_length = sweep_length_num, 
-             start_time = start_time_nun, 
-             blank_length = blank_length_num, 
-             blank_sweeps = blank_sweeps_num, 
+             sweep_length = SWEEP_LENGTH_NUM, 
+             start_time = START_TIME_NUM, 
+             blank_length = BLANK_LENGTH_NUM, 
+             blank_sweeps = BLANK_SWEEPS_NUM, 
              runs = repetitions, 
              shuffle = False, 
              save_sweep_table = True)
     
     return circle_in_stim
 
+
 # create the stimulus accroding to the desired  params and create a list of stimuli
-def callAccParameter(win
-                     ,num_reps_ex
+def callAccParameter(win, num_reps_ex
                      ,fieldSize_Circle
                      ,fieldSize_Square
-                     ,dotDensity_circ
-                     ,dotDensity_sqr
                      ,sweep_params_circ
                      ,sweep_params_sqr
-                     
+                     ,color_background
+                     ,color_dots
+                     ,vertical_pos
                      ):
         
         alltrial = []        
@@ -521,11 +524,14 @@ def callAccParameter(win
         rdkCircle = init_dot_stim_circ(win
                     ,num_reps_ex
                     ,field_size=fieldSize_Circle
-                    ,n_dots=1
+                    ,n_dots= 1
                     ,coher= 1
                     ,field_shape='circle'
                     ,stim_name='rdkCircle'
                     ,sweep_params_exp_circ=sweep_params_circ
+                    ,background_color=color_background
+                    ,dot_color=color_dots
+                    ,vertical_pos=vertical_pos
                     )
         
         # sweep order and sweep table    
@@ -534,11 +540,13 @@ def callAccParameter(win
         rdkSqr = init_dot_stim(win
                     ,num_reps_ex
                     ,field_size=fieldSize_Square
-                    ,n_dots=1
+                    ,n_dots= 1
                     ,coher= 1
                     ,field_shape='sqr'
                     ,stim_name='rdkSqr'
                     ,sweep_params_exp_sqr=sweep_params_sqr
+                    ,background_color=color_background
+                    ,dot_color=color_dots
                     )
     
         sqr_sweepTable = rdkSqr.sweep_table  
@@ -583,8 +591,9 @@ def callAccParameter(win
                 ,r=10
                 ,repetitions=1
                 ,sweep_param = sweep_params_background_circle
+                ,color=color_background
+                ,vertical_pos=vertical_pos
                 )
-        
 
         # We merge list_diameters and list_opacity into a single list where each element is a tuple of the form (diameters, opacity)
         list_circle = zip(list_diameters[np.array(rdkCircle.sweep_order)].tolist(), list_opacity[np.array(rdkCircle.sweep_order)].tolist())
@@ -598,252 +607,210 @@ def callAccParameter(win
         list_stimuli.append(rdkCircle)
         
         both_stimuli = StimulusArray(list_stimuli, 
-                            sweep_length = sweep_length_num,
-                            blank_length = blank_length_num   )
+                            sweep_length = SWEEP_LENGTH_NUM,
+                            blank_length = BLANK_LENGTH_NUM   )
         
         return both_stimuli    
-    
-def  createBlock(blockParameter
+
+
+def createBlock(win, blockParameterCircl, blockParameterSqr
                     ,blockParameterName
                     ,blockParameterInd
-                    ,sweep_params_int_sqr
-                    ,sweep_params_int_circ
                     ,fieldSizeCircle
                     ,fieldSizeSquare
-                    ,dotDensitysCircle
-                    ,dotDensitysSquare
+                    ,sweep_params_block_circ
+                    ,sweep_params_block_sqr
                     ,num_reps
+                    ,color_background 
+                    ,color_dots
+                    ,vertical_pos 
                     ):
-        
-        nDotsPer1SqrArea = [0.3]
-        fieldSizeCircle = [10]
-        fieldSizeSquare = [100]
-        dotDensitysCircle = nDotsPer1SqrArea
-        dotDensitysSquare = nDotsPer1SqrArea
 
-        num_reps = 1
-        opacity_vec = [0,1]
-        dirVecCirc = [0,180]
-        dirVecSqr =[0,180,90]
-        coherence_vec = [1]
-        dotsize_vec = [25]
-        dotspeed_vec = [0.1]
-            
-        sweep_params_block_circ = { 'Dir': (dirVecCirc, DIR_IND)
-                             ,'opacity': (opacity_vec,OPACITY_IND)
-                             ,'FieldCoherence': (coherence_vec, COHERENCE_IND)
-                             ,'dotSize': (dotsize_vec,DOT_SIZE_IND)
-                             ,'speed':(dotspeed_vec,SPEED_IND)
-                             ,'fieldSize':(fieldSizeCircle,FIELD_SIZE_IND)
-                             ,'dotDensity':(dotDensitysCircle,NDOTS_IND)
-                             }
-     
-        sweep_params_block_sqr = { 'Dir': (dirVecSqr, DIR_IND)
-                            ,'opacity': (opacity_vec,OPACITY_IND)
-                            ,'FieldCoherence': (coherence_vec, COHERENCE_IND)
-                            ,'dotSize': (dotsize_vec,DOT_SIZE_IND)
-                            ,'speed':(dotspeed_vec,SPEED_IND)
-                            ,'fieldSize':(fieldSizeSquare,FIELD_SIZE_IND)
-                            ,'dotDensity':(dotDensitysSquare,NDOTS_IND)
-                            } 
-    
-    
-    
-        sweep_params_block_circ[blockParameterName] =( blockParameter,blockParameterInd)
-        sweep_params_block_sqr[blockParameterName] =( blockParameter,blockParameterInd)
+    # We modify a subset of the parameters for the block
+    if blockParameterName != 'None':
+        sweep_params_block_circ[blockParameterName] =( blockParameterCircl,blockParameterInd)
+        sweep_params_block_sqr[blockParameterName] =( blockParameterSqr,blockParameterInd)
 
-        both_block= callAccParameter(win
-                                     ,num_reps_ex=num_reps
-                                     ,fieldSize_Circle=fieldSizeCircle
-                                     ,fieldSize_Square=fieldSizeSquare
-                                     ,dotDensity_circ=dotDensitysCircle
-                                     ,dotDensity_sqr=dotDensitysSquare
-                                     ,sweep_params_circ=sweep_params_block_circ
-                                     ,sweep_params_sqr=sweep_params_block_sqr
-                                     )
-        return both_block
-        
-        
-    
-    
+    both_block = callAccParameter(win, num_reps_ex=num_reps
+                                    ,fieldSize_Circle=fieldSizeCircle
+                                    ,fieldSize_Square=fieldSizeSquare
+                                    ,sweep_params_circ=sweep_params_block_circ
+                                    ,sweep_params_sqr=sweep_params_block_sqr
+                                    ,color_background=color_background
+                                    ,color_dots=color_dots
+                                    ,vertical_pos=vertical_pos
+                                    )
+    return both_block
 
-    
-def main(): 
+
+if __name__ == "__main__":
+
     nDotsPer1SqrArea = [0.3]
-    #fieldSizeCircle = [5,20,40]
-   # fieldSizeSquare = [100,100,100]  
-    fieldSizeCircle = [10]
-    fieldSizeSquare = [100]
+    fieldSizeCircle_default = [10] # For varying do [5,20,40]
+    fieldSizeSquare_default = [100] # For varying do [100,100,100]
     dotDensitysCircle = nDotsPer1SqrArea
     dotDensitysSquare = nDotsPer1SqrArea
-    #dotDensitysCircle = [0.99]
-   # dotDensitysSquare =[ 1]
-    
     num_reps = 1
-    #dirVec=[0, 45 ,90, 135, 180 ,225, 270 ,315]
     opacity_vec = [0,1]
     dirVecCirc = [0,180]
     dirVecSqr =[0,180,90]
     coherence_vec = [1]
     dotsize_vec = [25]
     dotspeed_vec = [0.1]
+    vertical_pos = 8
     
-#    nDotsPer1SqrArea = [0.1]
-#     fieldSizeSquare = [65]
-#      
-#     areaCircle = (size/2)**2*np.pi
-#     areaSquare = fieldSizeSquare[0]**2
-#    
-#     nDotsCircle = int(round(areaCircle*nDotsPer1SqrArea))
-#     nDotsSquare =int(round(areaSquare*nDotsPer1SqrArea))
+    dev_mode = True
+    if dev_mode:
+        my_monitor = monitors.Monitor(name='Test')
+        my_monitor.setSizePix((1280,800))
+        my_monitor.setWidth(20)
+        my_monitor.setDistance(15)
+        my_monitor.saveMon()
+        win = Window(size=[1024,768],
+            fullscr=False,
+            screen=0,
+            monitor= my_monitor,
+            warp=Warp.Spherical,
+            color= "black"
+        )
+    else: 
+        win = Window(
+            fullscr=True,
+            screen=1,
+            monitor='Gamma1.Luminance50',
+            warp=Warp.Spherical,
+            units ='deg'
+        )
 
-    
-    sweep_params_int_circ = { 'Dir': (dirVecCirc, DIR_IND)
-                             ,'opacity': (opacity_vec,OPACITY_IND)
-                             ,'FieldCoherence': (coherence_vec, COHERENCE_IND)
-                             ,'dotSize': (dotsize_vec,DOT_SIZE_IND)
-                             ,'speed':(dotspeed_vec,SPEED_IND)
-                             ,'fieldSize':(fieldSizeCircle,FIELD_SIZE_IND)
-                             ,'dotDensity':(dotDensitysCircle,NDOTS_IND)
-                             }
-     
-    sweep_params_int_sqr = { 'Dir': (dirVecSqr, DIR_IND)
+    # Below are the basic parameters for all blocks
+    sweep_params_block_circ = { 'Dir': (dirVecCirc, DIR_IND)
                             ,'opacity': (opacity_vec,OPACITY_IND)
                             ,'FieldCoherence': (coherence_vec, COHERENCE_IND)
                             ,'dotSize': (dotsize_vec,DOT_SIZE_IND)
                             ,'speed':(dotspeed_vec,SPEED_IND)
-                            ,'fieldSize':(fieldSizeSquare,FIELD_SIZE_IND)
-                            ,'dotDensity':(dotDensitysSquare,NDOTS_IND)
-                            } 
+                            ,'fieldSize':(fieldSizeCircle_default,FIELD_SIZE_IND)
+                            ,'dotDensity':(dotDensitysCircle,NDOTS_IND)
+                            }
     
-    
+    sweep_params_block_sqr = { 'Dir': (dirVecSqr, DIR_IND)
+                        ,'opacity': (opacity_vec,OPACITY_IND)
+                        ,'FieldCoherence': (coherence_vec, COHERENCE_IND)
+                        ,'dotSize': (dotsize_vec,DOT_SIZE_IND)
+                        ,'speed':(dotspeed_vec,SPEED_IND)
+                        ,'fieldSize':(fieldSizeSquare_default,FIELD_SIZE_IND)
+                        ,'dotDensity':(dotDensitysSquare,NDOTS_IND)
+                        } 
 
-#
-#
-#    # COHERENCE
+    color_background = 'black'
+    color_dots = (255,255,255)
+
+    # COHERENCE block
     coherence_vec_exp = [1,0.5,0.3,0.25,0.2,0.15,0.1,0]
-    both_stimuli_coherence = createBlock(coherence_vec_exp,
+    both_stimuli_coherence = createBlock(win, coherence_vec_exp,coherence_vec_exp,
                                          'FieldCoherence'
                                          ,COHERENCE_IND
-                                         ,sweep_params_int_sqr
-                                         ,sweep_params_int_circ
-                                         ,fieldSizeCircle
-                                         ,fieldSizeSquare
-                                         ,dotDensitysCircle
-                                         ,dotDensitysSquare
-                                         ,NUM_REPS
+                                         ,fieldSizeCircle_default
+                                         ,fieldSizeSquare_default
+                                         ,sweep_params_block_circ
+                                         ,sweep_params_block_sqr
+                                         ,num_reps
+                                         ,color_background 
+                                         ,color_dots
+                                         ,vertical_pos
                                          )
-#    
-    sweep_params_int_circ = { 'Dir': (dirVecCirc, DIR_IND)
-                             ,'opacity': (opacity_vec,OPACITY_IND)
-                             ,'FieldCoherence': (coherence_vec, COHERENCE_IND)
-                             ,'dotSize': (dotsize_vec,DOT_SIZE_IND)
-                             ,'speed':(dotspeed_vec,SPEED_IND)
-                             ,'fieldSize':(fieldSizeCircle,FIELD_SIZE_IND)
-                             ,'dotDensity':(dotDensitysCircle,NDOTS_IND)
-                             }
-     
-    sweep_params_int_sqr = { 'Dir': (dirVecSqr, DIR_IND)
-                            ,'opacity': (opacity_vec,OPACITY_IND)
-                            ,'FieldCoherence': (coherence_vec, COHERENCE_IND)
-                            ,'dotSize': (dotsize_vec,DOT_SIZE_IND)
-                            ,'speed':(dotspeed_vec,SPEED_IND)
-                            ,'fieldSize':(fieldSizeSquare,FIELD_SIZE_IND)
-                            ,'dotDensity':(dotDensitysSquare,NDOTS_IND)
-                            } 
-    
-    
-    
-#    
-#    
+
+    # DOT speed block
     dotspeed_vec_exp = [0.05,0.1,0.2,0.4,0.8]
-    both_stimuli_speed = createBlock(dotspeed_vec_exp,
+    both_stimuli_speed = createBlock(win, dotspeed_vec_exp,dotspeed_vec_exp,
                                          'speed'
                                          ,SPEED_IND
-                                         ,sweep_params_int_sqr
-                                         ,sweep_params_int_circ
-                                         ,fieldSizeCircle
-                                         ,fieldSizeSquare
-                                         ,dotDensitysCircle
-                                         ,dotDensitysSquare
-                                         ,NUM_REPS)
-    
-    
-#    
-    #    
-    sweep_params_int_circ = { 'Dir': (dirVecCirc, DIR_IND)
-                             ,'opacity': (opacity_vec,OPACITY_IND)
-                             ,'FieldCoherence': (coherence_vec, COHERENCE_IND)
-                             ,'dotSize': (dotsize_vec,DOT_SIZE_IND)
-                             ,'speed':(dotspeed_vec,SPEED_IND)
-                             ,'fieldSize':(fieldSizeCircle,FIELD_SIZE_IND)
-                             ,'dotDensity':(dotDensitysCircle,NDOTS_IND)
-                             }
-     
-    sweep_params_int_sqr = { 'Dir': (dirVecSqr, DIR_IND)
-                            ,'opacity': (opacity_vec,OPACITY_IND)
-                            ,'FieldCoherence': (coherence_vec, COHERENCE_IND)
-                            ,'dotSize': (dotsize_vec,DOT_SIZE_IND)
-                            ,'speed':(dotspeed_vec,SPEED_IND)
-                            ,'fieldSize':(fieldSizeSquare,FIELD_SIZE_IND)
-                            ,'dotDensity':(dotDensitysSquare,NDOTS_IND)
-                            } 
-    
+                                         ,fieldSizeCircle_default
+                                         ,fieldSizeSquare_default
+                                         ,sweep_params_block_circ
+                                         ,sweep_params_block_sqr
+                                         ,num_reps
+                                         ,color_background
+                                         ,color_dots
+                                         ,vertical_pos
+                                         )
         
-#     # DOT fieldsize
+    # DOT fieldsize block
     fieldSizeCircle_exp = [10,15,25,45]
-    fieldSizeSquare_exp  = [100]
+    fieldSizeSquare_exp  = [100, 100, 100, 100] # Both should be the same size
+
+    both_stimuli_Fieldsize = createBlock(win, fieldSizeCircle_exp,fieldSizeSquare_exp,
+                                            'fieldSize'
+                                            ,FIELD_SIZE_IND
+                                            ,fieldSizeCircle_default
+                                            ,fieldSizeSquare_default
+                                            ,sweep_params_block_circ
+                                            ,sweep_params_block_sqr
+                                            ,num_reps
+                                            ,color_background
+                                            ,color_dots
+                                            ,vertical_pos
+                                            )
     
-    sweep_params_int_circ['fieldSize'] =( fieldSizeCircle_exp,FIELD_SIZE_IND)
-    sweep_params_int_sqr['fieldSize'] =( fieldSizeSquare_exp,FIELD_SIZE_IND)
-
-    both_stimuli_Fieldsize= callAccParameter(win
-                                             ,num_reps_ex=NUM_REPS
-                                             ,fieldSize_Circle=fieldSizeCircle
-                                             ,fieldSize_Square=fieldSizeSquare
-                                             ,dotDensity_circ=dotDensitysCircle
-                                             ,dotDensity_sqr=dotDensitysSquare
-                                             ,sweep_params_circ=sweep_params_int_circ
-                                             ,sweep_params_sqr=sweep_params_int_sqr
-                                             )
-
-    # timing for NUM_REP =18
-#    blockCoherence = [(0, 1728)]
-#    blockSpeed = [(1728, 2808)]
-#    blockFieldSize = [(2808,3673)] # end of part 
+    # Reverse contrast block
+    color_background = 'white'
+    color_dots = (0,0,0)
+    reverse_stimuli = createBlock(win, [],[],
+                                            'None'
+                                            ,[]
+                                            ,fieldSizeCircle_default
+                                            ,fieldSizeSquare_default
+                                            ,sweep_params_block_circ
+                                            ,sweep_params_block_sqr
+                                            ,num_reps
+                                            ,color_background
+                                            ,color_dots
+                                            ,vertical_pos
+                                            )
+    
     inter_block_interval = 10
     
-    # length for blockCoherence
+    All_stim = []
+
+    # Add blockCoherence
     length_coherence_frames = both_stimuli_coherence.get_total_frames()
     fps = both_stimuli_coherence.stimuli[0].fps
     length_coherence_seconds = float(length_coherence_frames) / float(fps)
+    blockCoherence = [(0, length_coherence_seconds)]    
+    both_stimuli_coherence.set_display_sequence(blockCoherence)
+    All_stim.append(both_stimuli_coherence)
     print("length_coherence_seconds: ",length_coherence_seconds)
 
-    # length for blockSpeed
+    # Add blockSpeed    
+    current_time = length_coherence_seconds+inter_block_interval
     length_speed_frames = both_stimuli_speed.get_total_frames()
-    length_speed_seconds = float(length_speed_frames) / float(fps)
+    length_speed_seconds = float(length_speed_frames) / float(fps)    
+    blockSpeed = [(current_time, current_time+length_speed_seconds)]
+    both_stimuli_speed.set_display_sequence(blockSpeed)
+    All_stim.append(both_stimuli_speed)
     print("length_speed_seconds: ",length_speed_seconds)
 
-    # length for blockFieldSize
+    # Add blockFieldSize    
+    current_time = current_time+inter_block_interval+length_speed_seconds
     length_fieldsize_frames = both_stimuli_Fieldsize.get_total_frames()
-    length_fieldsize_seconds = float(length_fieldsize_frames) / float(fps)
+    length_fieldsize_seconds = float(length_fieldsize_frames) / float(fps)    
+    blockFieldSize = [(current_time, current_time+length_fieldsize_seconds)] 
+    both_stimuli_Fieldsize.set_display_sequence(blockFieldSize)
+    All_stim.append(both_stimuli_Fieldsize)
     print("length_fieldsize_seconds: ",length_fieldsize_seconds)
     
-    blockCoherence = [(0, length_coherence_seconds)]
-    current_time = length_coherence_seconds
-    blockSpeed = [(current_time+inter_block_interval, current_time+inter_block_interval+length_speed_seconds)]
-    
-    current_time = current_time+inter_block_interval+length_speed_seconds
-    blockFieldSize = [(current_time+inter_block_interval, current_time+inter_block_interval+length_fieldsize_seconds)] # end of part 1
-    
-    both_stimuli_coherence.set_display_sequence(blockCoherence)
-    both_stimuli_speed.set_display_sequence(blockSpeed)
-    both_stimuli_Fieldsize.set_display_sequence(blockFieldSize)
-    
+    # Add blockReverse
+    current_time = current_time+inter_block_interval+length_fieldsize_seconds
+    length_reverse_frames = reverse_stimuli.get_total_frames()
+    length_reverse_seconds = float(length_reverse_frames) / float(fps)
+    blockReverse = [(current_time, current_time+length_reverse_seconds)]
+    reverse_stimuli.set_display_sequence(blockReverse)
+    All_stim.append(reverse_stimuli)
+    print("length_reverse_seconds: ",length_reverse_seconds)
+
     pre_blank = 0
     post_blank = 0
     ss  = SweepStim(win
-                    ,stimuli = [both_stimuli_coherence, both_stimuli_speed, both_stimuli_Fieldsize]#need to be replaced with SessionA_stimuli
+                    ,stimuli = All_stim
                     ,pre_blank_sec = pre_blank
                     ,post_blank_sec  = post_blank                 
                     ,params = {}  # will be set by MPE to work on the rig
@@ -860,6 +827,3 @@ def main():
     # run it
     ss.run()
 
-
-if __name__ == "__main__":
-    main()
