@@ -654,7 +654,7 @@ if __name__ == "__main__":
     coherence_vec = [1]
     dotsize_vec = [25]
     dotspeed_vec = [0.1]
-    vertical_pos = 0
+    vertical_pos = 8
     
     dev_mode = True
     if dev_mode:
