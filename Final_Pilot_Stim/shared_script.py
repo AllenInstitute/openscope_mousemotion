@@ -95,8 +95,16 @@ class FixedDotStim(visual.DotStim):
         self.dotSize = dotSize
         self.refreshDots()
 
+    def setDir(self, Dir):
+        self.dir = Dir
+        self.refreshDots()
+
     def setopacity(self, opacity):
         self.opacity = opacity
+        self.refreshDots()
+
+    def setFieldCoherence(self, coherence):
+        self.coherence = coherence
         self.refreshDots()
 
     def setspeed(self, speed):
@@ -188,7 +196,6 @@ class FixedDotStim(visual.DotStim):
             self.dotSize = 3.0
         self.vertices = self._verticesBase = self._dotsXY = self._newDotsXY(self.nDots)
 
-        # all dots have the same speed
         if self.nDots != len(self._dotsSpeed):
             self._dotsSpeed = np.ones(self.nDots, dtype=float) * self.speed
             self._dotsLife = np.abs(self.dotLife) * np.random.rand(self.nDots)
@@ -198,7 +205,16 @@ class FixedDotStim(visual.DotStim):
         # the last.
         if self.nDots != len(self._deadDots):
             self._deadDots = np.zeros(self.nDots, dtype=bool)
+            self.coherence = self.coherence
+            """
+            self._signalDots = np.zeros(self.nDots, dtype=bool)
+            self._signalDots[0:int(self.coherence * self.nDots)] = True
 
+            if self.noiseDots in ('direction', 'position', 'walk'):
+                self._dotsDir = np.random.rand(self.nDots) * PI_2
+                self._dotsDir[self._signalDots] = self.dir * PIOVER180
+            """
+            
     def _update_dotsXY(self):
         """The user shouldn't call this - its gets done within draw().
         """
@@ -374,7 +390,7 @@ def init_dot_stim(window,
                   background_color=None, 
                   dot_color=(255,255,255)
                   ):
-#{ 'Dir': (dirVec, 0), 'FieldCoherence': (coherence_vec, 1),'dotSize': (dotsize_vec,2)}
+
     dot_stimuli = Stimulus(FixedDotStim(window, nDots=int(n_dots), 
                                         fieldPos=(0,0), units='deg',
                                         fieldSize=(field_size[0], field_size[0]), 
