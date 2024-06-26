@@ -90,7 +90,8 @@ class FixedDotStim(visual.DotStim):
         return newDots
       
     # The function belows are needed to allow the Stimulus object to 
-    # overwrite the parameters of the dots.
+    # overwrite the parameters of the dots and to make sure new dots are displayed
+    # on new sweeps. 
     def setdotSize(self, dotSize):
         self.dotSize = dotSize
         self.refreshDots()
