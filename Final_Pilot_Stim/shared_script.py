@@ -353,10 +353,7 @@ def set_new_trial_orders (alltrial, circTable, sqrTable):
         #look for the index of the list to match the order between the circle and sqr
 
         sweepOrderCirc=([i for i, tpl in enumerate(circTable) if tpl == (selected_elementsCircle)])
-        print('trial' ,trial)
-        print('selected' ,selected_elementsCircle)
-        print(sweepOrderCirc)
-       
+
         sweepOrderCirc_all.append(int(sweepOrderCirc[0]))        
 
         sweepOrderSqr=([i for i, tpl in enumerate(sqrTable) if tpl == (selected_elements1Sqr)])
@@ -492,7 +489,7 @@ def init_circle(win, r=20, repetitions=10, sweep_param = {}, color='black', vert
         win, vertices= _calcEquilateralVertices(_calculateMinEdges(1.5, threshold=5)),
         pos=(0,vertical_pos), size=(r*2, r*2), units="deg",
         interpolate=True, fillColor=color,
-        autoDraw=False, lineWidth=0, lineColor="black")
+        autoDraw=False, lineWidth=0, lineColor=color)
     
     circle_in_stim = Stimulus(circle, 
              sweep_params = sweep_param, 
@@ -628,8 +625,8 @@ def createBlock(win, blockParameterCircl, blockParameterSqr
 
     # We modify a subset of the parameters for the block
     if blockParameterName != 'None':
-        sweep_params_block_circ[blockParameterName] =( blockParameterCircl,blockParameterInd)
-        sweep_params_block_sqr[blockParameterName] =( blockParameterSqr,blockParameterInd)
+        sweep_params_block_circ[blockParameterName] =(blockParameterCircl,blockParameterInd)
+        sweep_params_block_sqr[blockParameterName] =(blockParameterSqr,blockParameterInd)
 
     both_block = callAccParameter(win, num_reps_ex=num_reps
                                     ,fieldSize_Circle=fieldSizeCircle
@@ -657,7 +654,7 @@ if __name__ == "__main__":
     coherence_vec = [1]
     dotsize_vec = [25]
     dotspeed_vec = [0.1]
-    vertical_pos = 8
+    vertical_pos = 0
     
     dev_mode = True
     if dev_mode:
@@ -711,8 +708,8 @@ if __name__ == "__main__":
                                          ,COHERENCE_IND
                                          ,fieldSizeCircle_default
                                          ,fieldSizeSquare_default
-                                         ,sweep_params_block_circ
-                                         ,sweep_params_block_sqr
+                                         ,sweep_params_block_circ.copy()
+                                         ,sweep_params_block_sqr.copy()
                                          ,num_reps
                                          ,color_background 
                                          ,color_dots
@@ -726,8 +723,8 @@ if __name__ == "__main__":
                                          ,SPEED_IND
                                          ,fieldSizeCircle_default
                                          ,fieldSizeSquare_default
-                                         ,sweep_params_block_circ
-                                         ,sweep_params_block_sqr
+                                         ,sweep_params_block_circ.copy()
+                                         ,sweep_params_block_sqr.copy()
                                          ,num_reps
                                          ,color_background
                                          ,color_dots
@@ -743,8 +740,8 @@ if __name__ == "__main__":
                                             ,FIELD_SIZE_IND
                                             ,fieldSizeCircle_default
                                             ,fieldSizeSquare_default
-                                            ,sweep_params_block_circ
-                                            ,sweep_params_block_sqr
+                                            ,sweep_params_block_circ.copy()
+                                            ,sweep_params_block_sqr.copy()
                                             ,num_reps
                                             ,color_background
                                             ,color_dots
@@ -759,8 +756,8 @@ if __name__ == "__main__":
                                             ,[]
                                             ,fieldSizeCircle_default
                                             ,fieldSizeSquare_default
-                                            ,sweep_params_block_circ
-                                            ,sweep_params_block_sqr
+                                            ,sweep_params_block_circ.copy()
+                                            ,sweep_params_block_sqr.copy()
                                             ,num_reps
                                             ,color_background
                                             ,color_dots
