@@ -29,7 +29,7 @@ _day_10_script_md5: &day_10_script_md5
     e53821b4b498bcecb4aa793e5dff67b5
     
 _mousemotion_script: &mousemotion_script
-    http://stash.corp.alleninstitute.org/users/jeromel/repos/openscope_sequencelearning_stim/raw/production_stimulus.py?at=22c9dff0eb4dd20d438a3ac8b1a082d91858c048
+    http://stash.corp.alleninstitute.org/users/jeromel/repos/openscope_mousemotion/raw/Final_Pilot_Stim/shared_script.py?at=2adb1071c52abdb457d55c542237bbf02b184413
 
 _mousemotion_script_md5: &mousemotion_script_md5
     ec614a4157f9c76e831d9e88e09c58f9
@@ -145,4 +145,4 @@ stages:
         num_reps: 1
         dev_mode: False
         inter_block_interval: 10
-        vertical_pos: -8
+        vertical_pos: 0
