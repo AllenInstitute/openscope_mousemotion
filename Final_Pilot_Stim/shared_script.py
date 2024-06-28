@@ -10,6 +10,9 @@ from camstim.sweepstim import Stimulus
 import itertools
 from psychopy.tools.arraytools import val2array
 from camstim import Window, Warp
+import argparse
+import logging 
+import yaml
 
 # All CONSTANTS below are NOT to be changed
 DIR_IND = 0
@@ -658,6 +661,30 @@ def createBlock(win, blockParameterCircl, blockParameterSqr
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser("mtrain")
+    parser.add_argument("json_path", nargs="?", type=str, default="")
+
+    args, _ = parser.parse_known_args() # <- this ensures that we ignore other arguments that might be needed by camstim
+    
+    # print args
+    if args.json_path == "":
+        logging.warning("No json path provided, using default parameters. THIS IS NOT THE EXPECTED BEHAVIOR FOR PRODUCTION RUNS")
+        json_params = {}
+    else:
+        with open(args.json_path, 'r') as f:
+            # we use the yaml package here because the json package loads as unicode, which prevents using the keys as parameters later
+            json_params = yaml.load(f)
+            logging.info("Loaded json parameters from mtrain")
+            # end of mtrain part
+
+    dist = 15.0
+    wid = 52.0
+
+    # mtrain should be providing : a path to a network folder or a local folder with the entire repo pulled
+    vertical_pos = json_params.get('vertical_pos', 8)
+    num_reps = json_params.get('num_reps', 1)
+    dev_mode = json_params.get('dev_mode', True)
+    inter_block_interval = json_params.get('inter_block_interval', 10)
 
     nDotsPer1SqrArea = [0.3]
     fieldSizeCircle_default = [10] # For varying do [5,20,40]
@@ -671,10 +698,6 @@ if __name__ == "__main__":
     dotsize_vec = [25]
     dotspeed_vec = [0.1]
 
-    vertical_pos = 8
-    num_reps = 1
-
-    dev_mode = True
     if dev_mode:
         my_monitor = monitors.Monitor(name='Test')
         my_monitor.setSizePix((1280,800))
@@ -691,10 +714,9 @@ if __name__ == "__main__":
     else: 
         win = Window(
             fullscr=True,
-            screen=1,
+            screen=0,
             monitor='Gamma1.Luminance50',
             warp=Warp.Spherical,
-            units ='deg'
         )
 
     # Below are the basic parameters for all blocks
@@ -782,7 +804,6 @@ if __name__ == "__main__":
                                             ,vertical_pos
                                             )
     
-    inter_block_interval = 10
     
     All_stim = []
 
