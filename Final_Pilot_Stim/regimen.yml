@@ -71,6 +71,9 @@ transitions:
     source: ANTERIOR_MOUSEMOTION
     dest: POSTERIOR_MOUSEMOTION
 
+  - trigger: manual
+    source: POSTERIOR_MOUSEMOTION
+    dest: TEST_MOUSEMOTION
 
 stages:
     DAY_6:
@@ -130,6 +133,16 @@ stages:
         parameters:
             stage: POSTERIOR_MOUSEMOTION
         num_reps: 17
+        dev_mode: False
+        inter_block_interval: 10
+        vertical_pos: -8
+
+    TEST_MOUSEMOTION:
+        script: *mousemotion_script
+        script_md5: *mousemotion_script_md5
+        parameters:
+            stage: TEST_MOUSEMOTION
+        num_reps: 1
         dev_mode: False
         inter_block_interval: 10
         vertical_pos: -8
