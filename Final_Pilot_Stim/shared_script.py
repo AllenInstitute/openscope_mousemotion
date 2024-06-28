@@ -664,15 +664,16 @@ if __name__ == "__main__":
     fieldSizeSquare_default = [100] # For varying do [100,100,100]
     dotDensitysCircle = nDotsPer1SqrArea
     dotDensitysSquare = nDotsPer1SqrArea
-    num_reps = 1
     opacity_vec = [0,1]
     dirVecCirc = [0,180]
     dirVecSqr =[0,180,90]
     coherence_vec = [1]
     dotsize_vec = [25]
     dotspeed_vec = [0.1]
+
     vertical_pos = 8
-    
+    num_reps = 1
+
     dev_mode = True
     if dev_mode:
         my_monitor = monitors.Monitor(name='Test')
