@@ -325,7 +325,7 @@ def set_trials_sqr(n_reps, direction_vec,InnerdirVec, coherence_level,DotSpeed,D
                 
             else:
                 new_tuple = tup
-    modified_list.append(new_tuple)
+            modified_list.append(new_tuple)
     
 
 
