@@ -215,7 +215,7 @@ class FixedDotStim(visual.DotStim):
 
         # Don't allocate another array if the new number of dots is equal to
         # the last.
-        if self.nDots != len(self._deadDots):
+   #     if self.nDots != len(self._deadDots):
             self._deadDots = np.zeros(self.nDots, dtype=bool)
             self.coherence = self.coherence
             """
@@ -695,7 +695,7 @@ if __name__ == "__main__":
     inter_block_interval = json_params.get('inter_block_interval', 10)
 
     nDotsPer1SqrArea = [0.0006]
-    fieldSizeCircle_default = [146] # For varying do [5,20,40]
+    fieldSizeCircle_default = [196] # For varying do [5,20,40]
     fieldSizeSquare_default = [2000] # For varying do [100,100,100]
     dotDensity_default = nDotsPer1SqrArea
     dotDensitysCircle = nDotsPer1SqrArea
@@ -803,7 +803,7 @@ if __name__ == "__main__":
                                          )
         
     # DOT fieldsize block
-    fieldSizeCircle_exp = [97,146,246,460]
+    fieldSizeCircle_exp = [146,196,298,460]
     fieldSizeSquare_exp  = [2000,2000,2000,2000] # Both should be the same size
 
     both_stimuli_Fieldsize = createBlock(win, fieldSizeCircle_exp,fieldSizeSquare_exp,
