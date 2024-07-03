@@ -206,27 +206,16 @@ class FixedDotStim(visual.DotStim):
         # We then calculate the number of dots from the field size
         if self.dotSize is None:
             self.dotSize = 3.0
+
         self.vertices = self._verticesBase = self._dotsXY = self._newDotsXY(self.nDots)
 
-        if self.nDots != len(self._dotsSpeed):
-            self._dotsSpeed = np.ones(self.nDots, dtype=float) * self.speed
-            self._dotsLife = np.abs(self.dotLife) * np.random.rand(self.nDots)
-            self._dotsDir = np.random.rand(self.nDots) * PI_2
+        # We recreate all dots on every refreshs
+        self._dotsSpeed = np.ones(self.nDots, dtype=float) * self.speed
+        self._dotsLife = np.abs(self.dotLife) * np.random.rand(self.nDots)
+        self._dotsDir = np.random.rand(self.nDots) * PI_2
+        self._deadDots = np.zeros(self.nDots, dtype=bool)
+        self.coherence = self.coherence
 
-        # Don't allocate another array if the new number of dots is equal to
-        # the last.
-   #     if self.nDots != len(self._deadDots):
-            self._deadDots = np.zeros(self.nDots, dtype=bool)
-            self.coherence = self.coherence
-            """
-            self._signalDots = np.zeros(self.nDots, dtype=bool)
-            self._signalDots[0:int(self.coherence * self.nDots)] = True
-
-            if self.noiseDots in ('direction', 'position', 'walk'):
-                self._dotsDir = np.random.rand(self.nDots) * PI_2
-                self._dotsDir[self._signalDots] = self.dir * PIOVER180
-            """
-            
     def _update_dotsXY(self):
         """The user shouldn't call this - its gets done within draw().
         """
