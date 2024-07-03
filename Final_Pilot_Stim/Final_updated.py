@@ -694,7 +694,7 @@ if __name__ == "__main__":
     dev_mode = json_params.get('dev_mode', True)
     inter_block_interval = json_params.get('inter_block_interval', 10)
 
-    nDotsPer1SqrArea = [0.001]
+    nDotsPer1SqrArea = [0.0006]
     fieldSizeCircle_default = [146] # For varying do [5,20,40]
     fieldSizeSquare_default = [2000] # For varying do [100,100,100]
     dotDensity_default = nDotsPer1SqrArea
@@ -770,7 +770,7 @@ if __name__ == "__main__":
 
 
    # DOT dot density
-    nDotsPer1SqrArea_vec = [0.0001,0.001,0.003]
+    nDotsPer1SqrArea_vec = [0.0001,0.0006,0.0009]
 
     dotDensitysCircle = nDotsPer1SqrArea
     dotDensitysSquare = nDotsPer1SqrArea
