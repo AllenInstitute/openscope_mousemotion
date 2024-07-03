@@ -705,7 +705,7 @@ if __name__ == "__main__":
     dirVecSqr =[0,180,90]
     coherence_vec = [1]
     dotsize_vec = [25]
-    dotspeed_vec = [1.5]
+    dotspeed_vec = [3]
 
     if dev_mode:
         my_monitor = monitors.Monitor(name='Test')
@@ -788,7 +788,7 @@ if __name__ == "__main__":
                                             )
 
     # DOT speed block
-    dotspeed_vec_exp = [0.7,1.5,3]
+    dotspeed_vec_exp = [0.7,3,6]
     both_stimuli_speed = createBlock(win, dotspeed_vec_exp,dotspeed_vec_exp,
                                          'speed'
                                          ,SPEED_IND
