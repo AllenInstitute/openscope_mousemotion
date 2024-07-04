@@ -305,44 +305,59 @@ class FixedDotStim(visual.DotStim):
 # create a table with all the desired trials combination
 def set_trials_sqr(n_reps, direction_vec,InnerdirVec, coherence_level,DotSpeed,DotSize,FieldSizeSqr,FieldSizeCirc,DotDensity,shuff=True):
     
+    
     opacitycirc=[0,1]
     opacitysqr = [0,1]
-    
+    FieldSizeSqr1 = [FieldSizeSqr[0]]
     combinations_with_fixed_opacity = list(itertools.product(direction_vec, InnerdirVec,[1], [1], coherence_level, DotSize, 
-                                                             DotSpeed,FieldSizeSqr,FieldSizeCirc,DotDensity,))
+                                                             DotSpeed,FieldSizeSqr1,FieldSizeCirc,DotDensity,))
     my_list=combinations_with_fixed_opacity
     
     modified_list = []
     
-    
-  
-    for tup in my_list:
+    if len(FieldSizeCirc)>1:
+        
+        modified_list = []
+        seen_tuples = set()
+
+        for tup in my_list:
+            if (tup[0], tup[1]) in seen_tuples:
+        # Skip processing if the tuple has already been modified
+                continue
             if tup[0] == tup[1]:
-                new_tuple = (tup[0], tup[1], tup[2],0) + tup[4:]
-                
+                new_tuple = (tup[0], tup[1], tup[2], 0) + tup[4:]
+                seen_tuples.add((tup[0], tup[1]))
+                modified_list.append(new_tuple)
+        # Skip further processing for this pair
+                continue
+            else:
+                new_tuple = tup
+                modified_list.append(new_tuple)
+    else:
+  
+       
+        for tup in my_list:
+            if tup[0] == tup[1]:
+                new_tuple = (tup[0], tup[1], tup[2],0) + tup[4:]     
             else:
                 new_tuple = tup
             modified_list.append(new_tuple)
     
 
-
-    combinations_with_variable_opacity = list(itertools.product(direction_vec, InnerdirVec, opacitycirc, opacitysqr,
-                                                                coherence_level, DotSize, DotSpeed,FieldSizeSqr,FieldSizeCirc,DotDensity,))
+    combinations_with_variable_opacity_new = list(itertools.product([direction_vec[0]], InnerdirVec, [0], [1],
+                                                                coherence_level, DotSize, DotSpeed,FieldSizeSqr1,FieldSizeCirc,DotDensity,)) 
     
-    filtered_combinations_with_variable_opacity = []
-    for combo in combinations_with_variable_opacity:
-        
-        if combo[DIR_CIRC_IND_TRIAL] != combo[DIR_SQR_IND_TRIAL]:  # Skip combinations where directionvecinside == directionvecoutside
-            continue
-        if combo[OPACITY_SQR_IND_TRIAL] == 0 and combo[OPACITY_CIRC_IND_TRIAL] == 0:  # Skip combinations where both opacitycirc and opacitysqr are 0
-            continue
-        if combo[OPACITY_SQR_IND_TRIAL] == 1 and combo[OPACITY_CIRC_IND_TRIAL] == 1:  # Skip combinations where both opacitycirc and opacitysqr are 0
-            continue
-        filtered_combinations_with_variable_opacity.append(combo)
-
+    combinations_with_variable_opacity_90 = list(itertools.product([direction_vec[2]], [InnerdirVec[0]], [1], [0],
+                                                                coherence_level, DotSize, DotSpeed,FieldSizeSqr1,FieldSizeCirc,DotDensity,)) 
+    
+    
+    if len(FieldSizeCirc)>1:
+        combinations_with_variable_opacity_90 = list(itertools.product([direction_vec[2]], [InnerdirVec[0]], [1], [0],
+                                                                coherence_level, DotSize, DotSpeed,FieldSizeSqr1,[FieldSizeCirc[0]],DotDensity,)) 
+    
+  
     # Combine both sets of combinations
-    #all_combinations = combinations_with_fixed_opacity + filtered_combinations_with_variable_opacity
-    all_combinations = modified_list+filtered_combinations_with_variable_opacity
+    all_combinations = modified_list+combinations_with_variable_opacity_new+combinations_with_variable_opacity_90
     all_trials = []
     for combination in all_combinations:
         all_trials.extend([combination] * n_reps)
@@ -741,8 +756,7 @@ if __name__ == "__main__":
     color_dots = (255,255,255)
 
     # COHERENCE block
-   # coherence_vec_exp = [1,0.5,0.3,0.25,0.2,0.15,0.1,0]
-    coherence_vec_exp = [1]
+    coherence_vec_exp = [1,0.5,0.3,0.25,0.2,0.15,0.1,0]
 
     both_stimuli_coherence = createBlock(win, coherence_vec_exp,coherence_vec_exp,
                                          'FieldCoherence'
