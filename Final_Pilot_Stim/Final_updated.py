@@ -206,16 +206,27 @@ class FixedDotStim(visual.DotStim):
         # We then calculate the number of dots from the field size
         if self.dotSize is None:
             self.dotSize = 3.0
-
         self.vertices = self._verticesBase = self._dotsXY = self._newDotsXY(self.nDots)
 
-        # We recreate all dots on every refreshs
-        self._dotsSpeed = np.ones(self.nDots, dtype=float) * self.speed
-        self._dotsLife = np.abs(self.dotLife) * np.random.rand(self.nDots)
-        self._dotsDir = np.random.rand(self.nDots) * PI_2
-        self._deadDots = np.zeros(self.nDots, dtype=bool)
-        self.coherence = self.coherence
+        if self.nDots != len(self._dotsSpeed):
+            self._dotsSpeed = np.ones(self.nDots, dtype=float) * self.speed
+            self._dotsLife = np.abs(self.dotLife) * np.random.rand(self.nDots)
+            self._dotsDir = np.random.rand(self.nDots) * PI_2
 
+        # Don't allocate another array if the new number of dots is equal to
+        # the last.
+       # if self.nDots != len(self._deadDots):
+            self._deadDots = np.zeros(self.nDots, dtype=bool)
+            self.coherence = self.coherence
+            """
+            self._signalDots = np.zeros(self.nDots, dtype=bool)
+            self._signalDots[0:int(self.coherence * self.nDots)] = True
+
+            if self.noiseDots in ('direction', 'position', 'walk'):
+                self._dotsDir = np.random.rand(self.nDots) * PI_2
+                self._dotsDir[self._signalDots] = self.dir * PIOVER180
+            """
+            
     def _update_dotsXY(self):
         """The user shouldn't call this - its gets done within draw().
         """
@@ -305,7 +316,6 @@ class FixedDotStim(visual.DotStim):
 # create a table with all the desired trials combination
 def set_trials_sqr(n_reps, direction_vec,InnerdirVec, coherence_level,DotSpeed,DotSize,FieldSizeSqr,FieldSizeCirc,DotDensity,shuff=True):
     
-    
     opacitycirc=[0,1]
     opacitysqr = [0,1]
     FieldSizeSqr1 = [FieldSizeSqr[0]]
@@ -356,7 +366,38 @@ def set_trials_sqr(n_reps, direction_vec,InnerdirVec, coherence_level,DotSpeed,D
                                                                 coherence_level, DotSize, DotSpeed,FieldSizeSqr1,[FieldSizeCirc[0]],DotDensity,)) 
     
   
+#    combinations_with_variable_opacity = list(itertools.product(direction_vec, InnerdirVec, opacitycirc, opacitysqr,
+#                                                                coherence_level, DotSize, DotSpeed,FieldSizeSqr1,FieldSizeCirc,DotDensity,))
+#    seen_pairs = set()
+#
+#    filtered_combinations_with_variable_opacity = []
+#    for combo in combinations_with_variable_opacity:
+#        
+#        if combo[DIR_CIRC_IND_TRIAL] != combo[DIR_SQR_IND_TRIAL]:  # Skip combinations where directionvecinside == directionvecoutside
+#            continue
+#        if combo[OPACITY_SQR_IND_TRIAL] == 0 and combo[OPACITY_CIRC_IND_TRIAL] == 0:  # Skip combinations where both opacitycirc and opacitysqr are 0
+#            continue
+#        if combo[OPACITY_SQR_IND_TRIAL] == 1 and combo[OPACITY_CIRC_IND_TRIAL] == 1:  # Skip combinations where both opacitycirc and opacitysqr are 0
+#            continue
+#        
+#        
+#        filtered_combinations_with_variable_opacity.append(combo)
+#        if len(FieldSizeCirc)>1:
+#               if  combo[OPACITY_SQR_IND_TRIAL] == 1 and combo[OPACITY_CIRC_IND_TRIAL] == 0:
+#                   pair = (combo[DIR_CIRC_IND_TRIAL], combo[DIR_SQR_IND_TRIAL])
+#                   if pair in seen_pairs:
+#            # Skip further processing for this pair if already seen
+#                    continue
+#                   else:
+#                    seen_pairs.add(pair)
+
+#        filtered_combinations_with_variable_opacity.append(combo)
+
+
+
+
     # Combine both sets of combinations
+    #all_combinations = combinations_with_fixed_opacity + filtered_combinations_with_variable_opacity
     all_combinations = modified_list+combinations_with_variable_opacity_new+combinations_with_variable_opacity_90
     all_trials = []
     for combination in all_combinations:
@@ -581,10 +622,10 @@ def callAccParameter(win, num_reps_ex
         sqr_sweepTable = rdkSqr.sweep_table  
 
         # num_reps_ex/2
-        if round(num_reps_ex/2)== 0 :
-           n_reps_ex = 1
-        else:
-           n_reps_ex = round(n_reps_ex/2)
+#        if round(num_reps_ex/2)== 0 :
+#           n_reps_ex = 1
+#        else:
+#           n_reps_ex = round(num_reps_ex/2)
            
         alltrial= set_trials_sqr(
             n_reps=num_reps_ex
@@ -693,8 +734,8 @@ if __name__ == "__main__":
     wid = 52.0
 
     # mtrain should be providing : a path to a network folder or a local folder with the entire repo pulled
-    vertical_pos = json_params.get('vertical_pos', 8)
-    num_reps = json_params.get('num_reps', 1)
+    vertical_pos = json_params.get('vertical_pos', -146)
+    num_reps = json_params.get('num_reps',1)
     dev_mode = json_params.get('dev_mode', True)
     inter_block_interval = json_params.get('inter_block_interval', 10)
 
@@ -756,7 +797,8 @@ if __name__ == "__main__":
     color_dots = (255,255,255)
 
     # COHERENCE block
-    coherence_vec_exp = [1,0.5,0.3,0.25,0.2,0.15,0.1,0]
+   # coherence_vec_exp = [1,0.5,0.3,0.25,0.2,0.15,0.1,0]
+    coherence_vec_exp = [1]
 
     both_stimuli_coherence = createBlock(win, coherence_vec_exp,coherence_vec_exp,
                                          'FieldCoherence'
@@ -825,20 +867,20 @@ if __name__ == "__main__":
   
     
     # Reverse contrast block
-    color_background = 'white'
-    color_dots = (0,0,0)
-    reverse_stimuli = createBlock(win, [],[],
-                                            'None'
-                                            ,[]
-                                            ,fieldSizeCircle_default
-                                            ,fieldSizeSquare_default
-                                            ,sweep_params_block_circ.copy()
-                                            ,sweep_params_block_sqr.copy()
-                                            ,num_reps
-                                            ,color_background
-                                            ,color_dots
-                                            ,vertical_pos
-                                            )
+#    color_background = 'white'
+#    color_dots = (0,0,0)
+#    reverse_stimuli = createBlock(win, [],[],
+#                                            'None'
+#                                            ,[]
+#                                            ,fieldSizeCircle_default
+#                                            ,fieldSizeSquare_default
+#                                            ,sweep_params_block_circ.copy()
+#                                            ,sweep_params_block_sqr.copy()
+#                                            ,num_reps
+#                                            ,color_background
+#                                            ,color_dots
+#                                            ,vertical_pos
+#                                            )
     
     
     All_stim = []
@@ -886,13 +928,13 @@ if __name__ == "__main__":
    
     
     # Add blockReverse
-    current_time = current_time+inter_block_interval+length_fieldsize_seconds
-    length_reverse_frames = reverse_stimuli.get_total_frames()
-    length_reverse_seconds = float(length_reverse_frames) / float(fps)
-    blockReverse = [(current_time, current_time+length_reverse_seconds)]
-    reverse_stimuli.set_display_sequence(blockReverse)
-    All_stim.append(reverse_stimuli)
-    print("length_reverse_seconds: ",length_reverse_seconds)
+#    current_time = current_time+inter_block_interval+length_fieldsize_seconds
+#    length_reverse_frames = reverse_stimuli.get_total_frames()
+#    length_reverse_seconds = float(length_reverse_frames) / float(fps)
+#    blockReverse = [(current_time, current_time+length_reverse_seconds)]
+#    reverse_stimuli.set_display_sequence(blockReverse)
+#    All_stim.append(reverse_stimuli)
+#    print("length_reverse_seconds: ",length_reverse_seconds)
 
     pre_blank = 0
     post_blank = 0
