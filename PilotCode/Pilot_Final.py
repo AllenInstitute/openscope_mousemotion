@@ -513,11 +513,7 @@ def callAccParameter(win, num_reps_ex
                     )
     
         sqr_sweepTable = rdkSqr.sweep_table  
-        # num_reps_ex/2
-        if round(num_reps_ex/2)== 0 :
-           n_reps_ex = 1
-        else:
-           n_reps_ex = round(n_reps_ex/2)
+
            
         alltrial= set_trials_sqr(
             n_reps=num_reps_ex
@@ -613,7 +609,7 @@ if __name__ == "__main__":
     wid = 52.0
     # mtrain should be providing : a path to a network folder or a local folder with the entire repo pulled
     vertical_pos = json_params.get('vertical_pos', 8)
-    num_reps = json_params.get('num_reps', 1)
+    num_reps = json_params.get('num_reps', 17)
     dev_mode = json_params.get('dev_mode', True)
     inter_block_interval = json_params.get('inter_block_interval', 10)
     nDotsPer1SqrArea = [0.0006]
