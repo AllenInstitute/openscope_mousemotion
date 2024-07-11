@@ -54,6 +54,7 @@ class FixedDotStim(visual.DotStim):
         super(FixedDotStim, self).__init__(*args, **kwargs)
         # This is needed to avoid bar of dots. 
         self.refreshDots()
+
     def _newDotsXY(self, nDots):
         """Returns a uniform spread of dots, according to the `fieldShape` and
         `fieldSize`.
@@ -88,26 +89,33 @@ class FixedDotStim(visual.DotStim):
     def setdotSize(self, dotSize):
         self.dotSize = dotSize
         self.refreshDots()
+
     def setDir(self, Dir):
         self.dir = Dir
         self.refreshDots()
+
     def setopacity(self, opacity):
         self.opacity = opacity
         self.refreshDots()
+
     def setFieldCoherence(self, coherence):
         self.coherence = coherence
         self.refreshDots()
+
     def setspeed(self, speed):
         self.speed = speed
         self.refreshDots()
+
     def setfieldSize(self, fieldSize):
         fieldSize = val2array((fieldSize, fieldSize), False)
         self.fieldSize = fieldSize
         self.size = fieldSize
         self.refreshDots()
+
     def setdotDensity(self, dotDensity):
         self.dotDensity = dotDensity
         self.refreshDots()
+
     def setnDots(self, nDots):
         self.nDots = nDots
         self.refreshDots()
@@ -121,6 +129,7 @@ class FixedDotStim(visual.DotStim):
             if self.background_color != win.color:
                 self.old_background_color = win.color
                 win.color = self.background_color
+
     # updating the position of the dots for the square apparatus according to the direction of the movement
     def getRandPosInSquareSide(self,sideNum):
         xy = np.zeros((1, 2))
@@ -162,6 +171,7 @@ class FixedDotStim(visual.DotStim):
                 newDots[i,0] = np.cos(angleEntryOnCircEdge)*0.5*self.fieldSize[0]
                 newDots[i,1] = np.sin(angleEntryOnCircEdge)*0.5*self.fieldSize[1]
             return newDots
+        
     def refreshDots(self):
         """Callable user function to choose a new set of dots."""
         # We first calculate the number of dots from the density
@@ -615,7 +625,7 @@ if __name__ == "__main__":
 
     # mtrain should be providing : a path to a network folder or a local folder with the entire repo pulled
     vertical_pos = json_params.get('vertical_pos', 8)
-    num_reps = json_params.get('num_reps', 17)
+    num_reps = json_params.get('num_reps', 1)
     dev_mode = json_params.get('dev_mode', True)
     inter_block_interval = json_params.get('inter_block_interval', 10)
     
