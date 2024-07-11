@@ -3,7 +3,7 @@ import camstim
 from psychopy import visual, monitors
 import numpy as np
 import random
-from camstim import SweepStim,  Foraging
+from camstim import SweepStim,  Foraging, MovieStim
 from camstim.sweepstim import StimulusArray
 from camstim.sweepstim import Stimulus
 import itertools
@@ -12,6 +12,8 @@ from camstim import Window, Warp
 import argparse
 import logging 
 import yaml
+import os 
+
 # All CONSTANTS below are NOT to be changed
 DIR_IND = 0
 OPACITY_IND = 1
@@ -39,6 +41,7 @@ BLANK_SWEEPS_NUM        = 0
 PIOVER2 = np.pi / 2.
 PIOVER180 = np.pi / 180.
 PI_2 = 2 * np.pi
+
 # The following fixes the issue with the dots not being created on the edges of the screen. 
 class FixedDotStim(visual.DotStim):
     def __init__(self, *args, **kwargs):
@@ -180,10 +183,6 @@ class FixedDotStim(visual.DotStim):
         self._deadDots = np.zeros(self.nDots, dtype=bool)
         self.coherence = self.coherence
         
-        
-     
-       
-        
     def _update_dotsXY(self):
         """The user shouldn't call this - its gets done within draw().
         """
@@ -261,6 +260,7 @@ class FixedDotStim(visual.DotStim):
         # update the pixel XY coordinates in pixels (using _BaseVisual class)
         self._updateVertices()
 #,nDotsSqr,nDotsirc,
+
 # create a table with all the desired trials combination
 def set_trials_sqr(n_reps, direction_vec,InnerdirVec, coherence_level,DotSpeed,DotSize,FieldSizeSqr,FieldSizeCirc,DotDensity,shuff=True):
 
@@ -293,7 +293,6 @@ def set_trials_sqr(n_reps, direction_vec,InnerdirVec, coherence_level,DotSpeed,D
                 modified_list.append(new_tuple)
     else:
   
-       
         for tup in my_list:
             if tup[0] == tup[1]:
                 new_tuple = (tup[0], tup[1], tup[2],0) + tup[4:]     
@@ -343,6 +342,7 @@ def set_new_trial_orders (alltrial, circTable, sqrTable):
         sweepOrderSqr_all.append(int(sweepOrderSqr[0]))   
         
     return(sweepOrderCirc_all,sweepOrderSqr_all)
+
 # set dotSqr
 def init_dot_stim(window,
                   num_reps,
@@ -381,6 +381,7 @@ def init_dot_stim(window,
                             )
     dot_stimuli.stim_path = r"C:\\not_a_stim_script\\"+stim_name+".stim"
     return dot_stimuli
+
 # set dotCirc
 def init_dot_stim_circ(window,
                        num_reps,
@@ -419,6 +420,7 @@ def init_dot_stim_circ(window,
     dot_stimuli_circ.stim_path = r"C:\\not_a_stim_script\\"+stim_name+".stim"
    
     return dot_stimuli_circ
+
 # set constant circ 
 def init_circle(win, r=20, repetitions=10, sweep_param = {}, color='black', vertical_pos = 8):
     # The functions below are necessary to generate the dots in the circle with older version of psychopy
@@ -563,7 +565,8 @@ def callAccParameter(win, num_reps_ex
                             sweep_length = SWEEP_LENGTH_NUM,
                             blank_length = BLANK_LENGTH_NUM   )
         
-        return both_stimuli    
+        return both_stimuli
+
 def createBlock(win, blockParameterCircl, blockParameterSqr
                     ,blockParameterName
                     ,blockParameterInd
@@ -590,6 +593,7 @@ def createBlock(win, blockParameterCircl, blockParameterSqr
                                     ,vertical_pos=vertical_pos
                                     )
     return both_block
+    
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("mtrain")
     parser.add_argument("json_path", nargs="?", type=str, default="")
@@ -605,13 +609,22 @@ if __name__ == "__main__":
             json_params = yaml.load(f)
             logging.info("Loaded json parameters from mtrain")
             # end of mtrain part
+    
     dist = 15.0
     wid = 52.0
+
     # mtrain should be providing : a path to a network folder or a local folder with the entire repo pulled
     vertical_pos = json_params.get('vertical_pos', 8)
     num_reps = json_params.get('num_reps', 17)
     dev_mode = json_params.get('dev_mode', True)
     inter_block_interval = json_params.get('inter_block_interval', 10)
+    
+    # We get the current script path 
+    script_path = os.path.abspath(os.path.dirname(__file__))
+
+    data_folder = json_params.get('data_folder', os.path.abspath(
+        os.path.join(script_path, '..', "data")))
+
     nDotsPer1SqrArea = [0.0006]
     fieldSizeCircle_default = [196] # For varying do [5,20,40]
     fieldSizeSquare_default = [2000] # For varying do [100,100,100]
@@ -624,6 +637,7 @@ if __name__ == "__main__":
     coherence_vec = [1]
     dotsize_vec = [25]
     dotspeed_vec = [3]
+
     if dev_mode:
         my_monitor = monitors.Monitor(name='Test')
         my_monitor.setSizePix((1280,800))
@@ -645,6 +659,7 @@ if __name__ == "__main__":
             monitor='Gamma1.Luminance50',
             warp=Warp.Spherical,
         )
+    
     # Below are the basic parameters for all blocks
     sweep_params_block_circ = { 'Dir': (dirVecCirc, DIR_IND)
                             ,'opacity': (opacity_vec,OPACITY_IND)
@@ -662,13 +677,12 @@ if __name__ == "__main__":
                         ,'speed':(dotspeed_vec,SPEED_IND)
                         ,'fieldSize':(fieldSizeSquare_default,FIELD_SIZE_IND)
                         ,'dotDensity':(dotDensity_default,NDOTS_IND)
-                        } 
+                        }
+        
     color_background = 'black'
     color_dots = (255,255,255)
 
-    # COHERENCE block
-   # coherence_vec_exp = [1,0.5,0.3,0.25,0.2,0.15,0.1,0]
- 
+    # COHERENCE block 
     coherence_vec_exp = [1,0.5,0.3,0.25,0.2,0.15,0.1,0]
 
     both_stimuli_coherence = createBlock(win, coherence_vec_exp,coherence_vec_exp,
@@ -683,7 +697,8 @@ if __name__ == "__main__":
                                          ,color_dots
                                          ,vertical_pos
                                          )
-   # DOT dot density
+    
+    # DOT dot density
     nDotsPer1SqrArea_vec = [0.0001,0.0006,0.0009]
     dotDensitysCircle = nDotsPer1SqrArea
     dotDensitysSquare = nDotsPer1SqrArea
@@ -729,10 +744,18 @@ if __name__ == "__main__":
                                             ,color_dots
                                             ,vertical_pos
                                             )
-    
-  
-    
-   
+        
+    moviepath = os.path.join(data_folder, "sparse_noise_no_boundary_16x28_scaled.npy")
+
+    lsn_stim = MovieStim(movie_path=moviepath,
+                    window=win,
+                    frame_length=0.25,
+                    size=(1260, 720),
+                    start_time=0.0,
+                    stop_time=None,
+                    runs=1
+                    )
+
     All_stim = []
 
     # Add blockCoherence
@@ -744,10 +767,8 @@ if __name__ == "__main__":
     All_stim.append(both_stimuli_coherence)
     print("length_coherence_seconds: ",length_coherence_seconds)
     
-    
-     # Add blockDotdensity  
+    # Add blockDotdensity  
     current_time = length_coherence_seconds+inter_block_interval
-   # current_time = current_time+inter_block_interval+length_speed_seconds
     length_Dotdensity_frames = both_stimuli_Dotdensity.get_total_frames()
     length_Dotdensity_seconds = float(length_Dotdensity_frames) / float(fps)    
     blockDotdensity = [(current_time, current_time+length_Dotdensity_seconds)] 
@@ -755,10 +776,8 @@ if __name__ == "__main__":
     All_stim.append(both_stimuli_Dotdensity)
     print("length_fieldsize_seconds: ",length_Dotdensity_seconds)
     
-
     # Add blockSpeed    
     current_time = current_time+inter_block_interval+length_Dotdensity_seconds
-   # current_time = length_coherence_seconds+inter_block_interval
     length_speed_frames = both_stimuli_speed.get_total_frames()
     length_speed_seconds = float(length_speed_frames) / float(fps)    
     blockSpeed = [(current_time, current_time+length_speed_seconds)]
@@ -775,9 +794,13 @@ if __name__ == "__main__":
     All_stim.append(both_stimuli_Fieldsize)
     print("length_fieldsize_seconds: ",length_fieldsize_seconds)
     
-   
-
-
+    # Add LSN
+    current_time = current_time+inter_block_interval+length_fieldsize_seconds
+    length_lsn_seconds = 740
+    lsn_stim.set_display_sequence([(current_time, current_time+length_lsn_seconds)])
+    All_stim.append(lsn_stim)
+    print("length_lsn_seconds: ",length_lsn_seconds)
+    
     pre_blank = 0
     post_blank = 0
     ss  = SweepStim(win
