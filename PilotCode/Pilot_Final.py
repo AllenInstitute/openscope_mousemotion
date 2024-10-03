@@ -755,7 +755,7 @@ if __name__ == "__main__":
                                             ,vertical_pos
                                             )
         
-    moviepath = os.path.join(data_folder, "sparse_noise_no_boundary_16x28_scaled.npy")
+    moviepath = os.path.join(data_folder, "sparse_noise_8x14.npy")
 
     lsn_stim = MovieStim(movie_path=moviepath,
                     window=win,
