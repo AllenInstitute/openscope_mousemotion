@@ -13,6 +13,7 @@ import argparse
 import logging 
 import yaml
 import os 
+from psychopy import monitors, visual
 
 # All CONSTANTS below are NOT to be changed
 DIR_IND = 0
@@ -603,7 +604,41 @@ def createBlock(win, blockParameterCircl, blockParameterSqr
                                     ,vertical_pos=vertical_pos
                                     )
     return both_block
-    
+
+def create_receptive_field_mapping(window, number_runs = 15):
+    x = np.arange(-40,45,10)
+    y = np.arange(-40,45,10)
+    position = []
+    for i in x:
+        for j in y:
+            position.append([i,j])
+
+    stimulus = Stimulus(visual.GratingStim(window,
+                        units='deg',
+                        size=20,
+                        mask="circle",
+                        texRes=256,
+                        sf=0.1,
+                        ),
+        sweep_params={
+                'Pos':(position, 0),
+                'Contrast': ([0.8], 4),
+                'TF': ([4.0], 1),
+                'SF': ([0.08], 2),
+                'Ori': ([0,45,90], 3),
+                },
+        sweep_length=0.25,
+        start_time=0.0,
+        blank_length=0.0,
+        blank_sweeps=0,
+        runs=number_runs,
+        shuffle=True,
+        save_sweep_table=True,
+        )
+    stimulus.stim_path = r"C:\\not_a_stim_script\\receptive_field_block.stim"
+
+    return stimulus
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("mtrain")
     parser.add_argument("json_path", nargs="?", type=str, default="")
@@ -766,19 +801,36 @@ if __name__ == "__main__":
                     runs=1
                     )
 
+    nb_runs_ephys_rf = 15
+    ephys_rf_stim = create_receptive_field_mapping(win, number_runs=nb_runs_ephys_rf)
     All_stim = []
 
+    # Add LSN
+    current_time = 0
+    length_lsn_seconds = 5 #740
+    lsn_stim.set_display_sequence([(current_time, current_time+length_lsn_seconds)])
+    All_stim.append(lsn_stim)
+    print("length_lsn_seconds: ",length_lsn_seconds)
+    
+    # Add RF code from ephys
+    current_time = current_time+length_lsn_seconds+inter_block_interval
+    length_rf_seconds = 60*nb_runs_ephys_rf
+    ephys_rf_stim.set_display_sequence([(current_time, current_time+length_rf_seconds)])
+    All_stim.append(ephys_rf_stim)
+    print("length_rf_seconds: ",length_rf_seconds)
+    
     # Add blockCoherence
+    current_time= current_time+length_rf_seconds+inter_block_interval
     length_coherence_frames = both_stimuli_coherence.get_total_frames()
     fps = both_stimuli_coherence.stimuli[0].fps
     length_coherence_seconds = float(length_coherence_frames) / float(fps)
-    blockCoherence = [(0, length_coherence_seconds)]    
+    blockCoherence = [(current_time, current_time+length_coherence_seconds)]    
     both_stimuli_coherence.set_display_sequence(blockCoherence)
     All_stim.append(both_stimuli_coherence)
     print("length_coherence_seconds: ",length_coherence_seconds)
     
     # Add blockDotdensity  
-    current_time = length_coherence_seconds+inter_block_interval
+    current_time = current_time+length_coherence_seconds+inter_block_interval
     length_Dotdensity_frames = both_stimuli_Dotdensity.get_total_frames()
     length_Dotdensity_seconds = float(length_Dotdensity_frames) / float(fps)    
     blockDotdensity = [(current_time, current_time+length_Dotdensity_seconds)] 
@@ -804,13 +856,7 @@ if __name__ == "__main__":
     All_stim.append(both_stimuli_Fieldsize)
     print("length_fieldsize_seconds: ",length_fieldsize_seconds)
     
-    # Add LSN
-    current_time = current_time+inter_block_interval+length_fieldsize_seconds
-    length_lsn_seconds = 740
-    lsn_stim.set_display_sequence([(current_time, current_time+length_lsn_seconds)])
-    All_stim.append(lsn_stim)
-    print("length_lsn_seconds: ",length_lsn_seconds)
-    
+
     pre_blank = 0
     post_blank = 0
     ss  = SweepStim(win
