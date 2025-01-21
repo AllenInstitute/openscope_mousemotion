@@ -483,6 +483,7 @@ def init_circle(win, r=20, repetitions=10, sweep_param = {}, color='black', vert
              save_sweep_table = True)
     
     return circle_in_stim
+
 # create the stimulus accroding to the desired  params and create a list of stimuli
 def callAccParameter(win, num_reps_ex
                      ,fieldSize_Circle
@@ -660,7 +661,7 @@ if __name__ == "__main__":
 
     # mtrain should be providing : a path to a network folder or a local folder with the entire repo pulled
     vertical_pos = json_params.get('vertical_pos', 8)
-    num_reps = json_params.get('num_reps', 1)
+    num_reps = json_params.get('num_reps', 13) # 1)
     dev_mode = json_params.get('dev_mode', True)
     inter_block_interval = json_params.get('inter_block_interval', 10)
     
@@ -680,21 +681,21 @@ if __name__ == "__main__":
     dirVecCirc = [0,180]
     dirVecSqr =[0,180,90]
     coherence_vec = [1]
-    dotsize_vec = [25]
+    dotsize_vec = [50] # [25] old parameter
     dotspeed_vec = [3]
 
     if dev_mode:
         my_monitor = monitors.Monitor(name='Test')
-        my_monitor.setSizePix((1280,800))
-        my_monitor.setWidth(20)
-        my_monitor.setDistance(15)
+        my_monitor.setSizePix((800,600))
+        my_monitor.setWidth(wid)
+        my_monitor.setDistance(dist)
         my_monitor.saveMon()
-        win = Window(size=[1024,768],
-            fullscr=False,
+        win = Window(size=[800,600], # [1024,768],
+            fullscr=True,
             screen=0,
             monitor= my_monitor,
             warp=Warp.Spherical,
-            color= "black",
+            color= "gray",
             units = 'deg'
         )
     else: 
@@ -760,19 +761,20 @@ if __name__ == "__main__":
                                             ,vertical_pos
                                             )
     # DOT speed block
-    dotspeed_vec_exp = [0.7,3,6]
-    both_stimuli_speed = createBlock(win, dotspeed_vec_exp,dotspeed_vec_exp,
-                                         'speed'
-                                         ,SPEED_IND
-                                         ,fieldSizeCircle_default
-                                         ,fieldSizeSquare_default
-                                         ,sweep_params_block_circ.copy()
-                                         ,sweep_params_block_sqr.copy()
-                                         ,num_reps
-                                         ,color_background
-                                         ,color_dots
-                                         ,vertical_pos
-                                         )
+    # Removed from pilot
+    # dotspeed_vec_exp = [0.7,3,6]
+    # both_stimuli_speed = createBlock(win, dotspeed_vec_exp,dotspeed_vec_exp,
+    #                                     'speed'
+    #                                     ,SPEED_IND
+    #                                     ,fieldSizeCircle_default
+    #                                     ,fieldSizeSquare_default
+    #                                     ,sweep_params_block_circ.copy()
+    #                                     ,sweep_params_block_sqr.copy()
+    #                                     ,num_reps
+    #                                     ,color_background
+    #                                     ,color_dots
+    #                                     ,vertical_pos
+    #                                     )
         
     # DOT fieldsize block
     fieldSizeCircle_exp = [146,196,298,460]
@@ -795,13 +797,13 @@ if __name__ == "__main__":
     lsn_stim = MovieStim(movie_path=moviepath,
                     window=win,
                     frame_length=0.25,
-                    size=(1260, 720),
+                    size=(1024,768), #(1260, 720),
                     start_time=0.0,
                     stop_time=None,
                     runs=1
                     )
 
-    nb_runs_ephys_rf = 15
+    nb_runs_ephys_rf = 12
     ephys_rf_stim = create_receptive_field_mapping(win, number_runs=nb_runs_ephys_rf)
     All_stim = []
 
@@ -814,13 +816,15 @@ if __name__ == "__main__":
     
     # Add RF code from ephys
     current_time = current_time+length_lsn_seconds+inter_block_interval
-    length_rf_seconds = 60*nb_runs_ephys_rf
+    length_rf_seconds = 5 #60*nb_runs_ephys_rf
     ephys_rf_stim.set_display_sequence([(current_time, current_time+length_rf_seconds)])
     All_stim.append(ephys_rf_stim)
     print("length_rf_seconds: ",length_rf_seconds)
     
+    # Here we add 2 min long of delay to accomodate change in luminance
+    current_time = current_time+length_rf_seconds+5 #120
+    
     # Add blockCoherence
-    current_time= current_time+length_rf_seconds+inter_block_interval
     length_coherence_frames = both_stimuli_coherence.get_total_frames()
     fps = both_stimuli_coherence.stimuli[0].fps
     length_coherence_seconds = float(length_coherence_frames) / float(fps)
@@ -838,17 +842,18 @@ if __name__ == "__main__":
     All_stim.append(both_stimuli_Dotdensity)
     print("length_fieldsize_seconds: ",length_Dotdensity_seconds)
     
-    # Add blockSpeed    
-    current_time = current_time+inter_block_interval+length_Dotdensity_seconds
-    length_speed_frames = both_stimuli_speed.get_total_frames()
-    length_speed_seconds = float(length_speed_frames) / float(fps)    
-    blockSpeed = [(current_time, current_time+length_speed_seconds)]
-    both_stimuli_speed.set_display_sequence(blockSpeed)
-    All_stim.append(both_stimuli_speed)
-    print("length_speed_seconds: ",length_speed_seconds)
+    # Add blockSpeed 
+    # Removed to shorten pilot   
+    # current_time = current_time+inter_block_interval+length_Dotdensity_seconds
+    # length_speed_frames = both_stimuli_speed.get_total_frames()
+    # length_speed_seconds = float(length_speed_frames) / float(fps)    
+    # blockSpeed = [(current_time, current_time+length_speed_seconds)]
+    # both_stimuli_speed.set_display_sequence(blockSpeed)
+    # All_stim.append(both_stimuli_speed)
+    # print("length_speed_seconds: ",length_speed_seconds)
 
     # Add blockFieldSize    
-    current_time = current_time+inter_block_interval+length_speed_seconds
+    current_time = current_time+inter_block_interval+length_Dotdensity_seconds
     length_fieldsize_frames = both_stimuli_Fieldsize.get_total_frames()
     length_fieldsize_seconds = float(length_fieldsize_frames) / float(fps)    
     blockFieldSize = [(current_time, current_time+length_fieldsize_seconds)] 
