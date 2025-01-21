@@ -661,7 +661,7 @@ if __name__ == "__main__":
 
     # mtrain should be providing : a path to a network folder or a local folder with the entire repo pulled
     vertical_pos = json_params.get('vertical_pos', 8)
-    num_reps = json_params.get('num_reps', 13) # 1)
+    num_reps = json_params.get('num_reps', 1)
     dev_mode = json_params.get('dev_mode', True)
     inter_block_interval = json_params.get('inter_block_interval', 10)
     
@@ -809,20 +809,34 @@ if __name__ == "__main__":
 
     # Add LSN
     current_time = 0
-    length_lsn_seconds = 5 #740
+
+    # this is to make the LSN block shorter for the test mode
+    if num_reps == 1:
+        length_lsn_seconds = 10
+    else:
+        length_lsn_seconds = 740
     lsn_stim.set_display_sequence([(current_time, current_time+length_lsn_seconds)])
     All_stim.append(lsn_stim)
     print("length_lsn_seconds: ",length_lsn_seconds)
     
     # Add RF code from ephys
     current_time = current_time+length_lsn_seconds+inter_block_interval
-    length_rf_seconds = 5 #60*nb_runs_ephys_rf
+    if num_reps == 1:
+        length_rf_seconds = 10
+    else: 
+        length_rf_seconds = 60*nb_runs_ephys_rf
+    
     ephys_rf_stim.set_display_sequence([(current_time, current_time+length_rf_seconds)])
     All_stim.append(ephys_rf_stim)
     print("length_rf_seconds: ",length_rf_seconds)
     
     # Here we add 2 min long of delay to accomodate change in luminance
-    current_time = current_time+length_rf_seconds+5 #120
+    if num_reps == 1:
+        delay_luminance = 10
+    else:   
+        delay_luminance = 120
+
+    current_time = current_time+length_rf_seconds+delay_luminance #120
     
     # Add blockCoherence
     length_coherence_frames = both_stimuli_coherence.get_total_frames()
