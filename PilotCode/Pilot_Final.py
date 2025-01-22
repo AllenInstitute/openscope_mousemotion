@@ -671,7 +671,7 @@ if __name__ == "__main__":
     data_folder = json_params.get('data_folder', os.path.abspath(
         os.path.join(script_path, '..', "data")))
 
-    nDotsPer1SqrArea = [0.0006]
+    nDotsPer1SqrArea = [0.0003]
     fieldSizeCircle_default = [196] # For varying do [5,20,40]
     fieldSizeSquare_default = [2000] # For varying do [100,100,100]
     dotDensity_default = nDotsPer1SqrArea
@@ -681,7 +681,7 @@ if __name__ == "__main__":
     dirVecCirc = [0,180]
     dirVecSqr =[0,180,90]
     coherence_vec = [1]
-    dotsize_vec = [50] # [25] old parameter
+    dotsize_vec = [100] # [50] # [25] old parameter
     dotspeed_vec = [3]
 
     if dev_mode:
@@ -745,7 +745,7 @@ if __name__ == "__main__":
                                          )
     
     # DOT dot density
-    nDotsPer1SqrArea_vec = [0.0001,0.0006,0.0009]
+    nDotsPer1SqrArea_vec = [0.00005,0.0003,0.00045]
     dotDensitysCircle = nDotsPer1SqrArea
     dotDensitysSquare = nDotsPer1SqrArea
     both_stimuli_Dotdensity = createBlock(win, nDotsPer1SqrArea_vec,nDotsPer1SqrArea_vec,
