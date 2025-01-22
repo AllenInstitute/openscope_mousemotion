@@ -626,7 +626,7 @@ def create_receptive_field_mapping(window, number_runs = 15):
                 'Contrast': ([0.8], 4),
                 'TF': ([4.0], 1),
                 'SF': ([0.08], 2),
-                'Ori': ([0,45,90], 3),
+                'Ori': ([0,45,90, ], 3),
                 },
         sweep_length=0.25,
         start_time=0.0,
@@ -639,6 +639,33 @@ def create_receptive_field_mapping(window, number_runs = 15):
     stimulus.stim_path = r"C:\\not_a_stim_script\\receptive_field_block.stim"
 
     return stimulus
+
+def create_gratingStim(window, number_runs = 15):
+    stimulus_grating = Stimulus(visual.GratingStim(window,
+                        pos=(0, 0),
+                        units='deg',
+                        size=(250, 250),
+                        mask="None",
+                        texRes=256,
+                        sf=0.1,
+                        ),
+        sweep_params={
+                'Contrast': ([0.8], 0),
+                'TF': ([4.0], 1),
+                'SF': ([0.08], 2),
+                'Ori': (range(0, 360, 45), 3),
+                },
+        sweep_length=1,
+        start_time=0.0,
+        blank_length=0.5,
+        blank_sweeps=0,
+        runs=number_runs,
+        shuffle=True,
+        save_sweep_table=True,
+        )
+    stimulus_grating.stim_path = r"C:\\not_a_stim_script\\drifting_gratings_field_block.stim"
+    return stimulus_grating
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("mtrain")
@@ -681,7 +708,7 @@ if __name__ == "__main__":
     dirVecCirc = [0,180]
     dirVecSqr =[0,180,90]
     coherence_vec = [1]
-    dotsize_vec = [100] # [50] # [25] old parameter
+    dotsize_vec = [50] # [50] # [25] old parameter
     dotspeed_vec = [3]
 
     if dev_mode:
@@ -729,7 +756,7 @@ if __name__ == "__main__":
     color_dots = (255,255,255)
 
     # COHERENCE block 
-    coherence_vec_exp = [1,0.5,0.3,0.25,0.2,0.15,0.1,0]
+    coherence_vec_exp = [1, 0.75, 0.5, 0.25, 0] 
 
     both_stimuli_coherence = createBlock(win, coherence_vec_exp,coherence_vec_exp,
                                          'FieldCoherence'
@@ -745,7 +772,7 @@ if __name__ == "__main__":
                                          )
     
     # DOT dot density
-    nDotsPer1SqrArea_vec = [0.00005,0.0003,0.00045]
+    nDotsPer1SqrArea_vec = [0.0001,0.0002,0.0003]
     dotDensitysCircle = nDotsPer1SqrArea
     dotDensitysSquare = nDotsPer1SqrArea
     both_stimuli_Dotdensity = createBlock(win, nDotsPer1SqrArea_vec,nDotsPer1SqrArea_vec,
@@ -761,20 +788,19 @@ if __name__ == "__main__":
                                             ,vertical_pos
                                             )
     # DOT speed block
-    # Removed from pilot
-    # dotspeed_vec_exp = [0.7,3,6]
-    # both_stimuli_speed = createBlock(win, dotspeed_vec_exp,dotspeed_vec_exp,
-    #                                     'speed'
-    #                                     ,SPEED_IND
-    #                                     ,fieldSizeCircle_default
-    #                                     ,fieldSizeSquare_default
-    #                                     ,sweep_params_block_circ.copy()
-    #                                     ,sweep_params_block_sqr.copy()
-    #                                     ,num_reps
-    #                                     ,color_background
-    #                                     ,color_dots
-    #                                     ,vertical_pos
-    #                                     )
+    dotspeed_vec_exp = [0.7,3,6]
+    both_stimuli_speed = createBlock(win, dotspeed_vec_exp,dotspeed_vec_exp,
+                                         'speed'
+                                         ,SPEED_IND
+                                         ,fieldSizeCircle_default
+                                         ,fieldSizeSquare_default
+                                         ,sweep_params_block_circ.copy()
+                                         ,sweep_params_block_sqr.copy()
+                                         ,num_reps
+                                         ,color_background
+                                         ,color_dots
+                                         ,vertical_pos
+                                         )
         
     # DOT fieldsize block
     fieldSizeCircle_exp = [146,196,298,460]
@@ -805,6 +831,8 @@ if __name__ == "__main__":
 
     nb_runs_ephys_rf = 12
     ephys_rf_stim = create_receptive_field_mapping(win, number_runs=nb_runs_ephys_rf)
+    drifting_grating_stim = create_gratingStim(win, number_runs=num_reps)
+
     All_stim = []
 
     # Add LSN
@@ -830,13 +858,25 @@ if __name__ == "__main__":
     All_stim.append(ephys_rf_stim)
     print("length_rf_seconds: ",length_rf_seconds)
     
-    # Here we add 2 min long of delay to accomodate change in luminance
+    # drifting_grating_stim
+    current_time = current_time+length_rf_seconds+inter_block_interval
+
+    if num_reps == 1:
+        length_drifting_grating_seconds = 10
+    else:
+        length_drifting_grating_seconds = 8*1.5*num_reps
+
+    drifting_grating_stim.set_display_sequence([(current_time, current_time+length_drifting_grating_seconds)])
+    All_stim.append(drifting_grating_stim)
+    print("length_drifting_grating_seconds: ",length_drifting_grating_seconds)
+
     if num_reps == 1:
         delay_luminance = 10
     else:   
         delay_luminance = 120
 
-    current_time = current_time+length_rf_seconds+delay_luminance #120
+    # Here we add 2 min long of delay to accomodate change in luminance
+    current_time = current_time+length_drifting_grating_seconds+delay_luminance #120
     
     # Add blockCoherence
     length_coherence_frames = both_stimuli_coherence.get_total_frames()
@@ -857,17 +897,16 @@ if __name__ == "__main__":
     print("length_fieldsize_seconds: ",length_Dotdensity_seconds)
     
     # Add blockSpeed 
-    # Removed to shorten pilot   
-    # current_time = current_time+inter_block_interval+length_Dotdensity_seconds
-    # length_speed_frames = both_stimuli_speed.get_total_frames()
-    # length_speed_seconds = float(length_speed_frames) / float(fps)    
-    # blockSpeed = [(current_time, current_time+length_speed_seconds)]
-    # both_stimuli_speed.set_display_sequence(blockSpeed)
-    # All_stim.append(both_stimuli_speed)
-    # print("length_speed_seconds: ",length_speed_seconds)
+    current_time = current_time+inter_block_interval+length_Dotdensity_seconds
+    length_speed_frames = both_stimuli_speed.get_total_frames()
+    length_speed_seconds = float(length_speed_frames) / float(fps)    
+    blockSpeed = [(current_time, current_time+length_speed_seconds)]
+    both_stimuli_speed.set_display_sequence(blockSpeed)
+    All_stim.append(both_stimuli_speed)
+    print("length_speed_seconds: ",length_speed_seconds)
 
     # Add blockFieldSize    
-    current_time = current_time+inter_block_interval+length_Dotdensity_seconds
+    current_time = current_time+inter_block_interval+length_speed_seconds
     length_fieldsize_frames = both_stimuli_Fieldsize.get_total_frames()
     length_fieldsize_seconds = float(length_fieldsize_frames) / float(fps)    
     blockFieldSize = [(current_time, current_time+length_fieldsize_seconds)] 
