@@ -675,7 +675,7 @@ def create_homogeneous_background(window, duration, color):
                         size=(250, 250),
                         mask="None",
                         texRes=256,
-                        constrast = 1,
+                        contrast = 1,
                         sf=0,
                         ),
         sweep_params={
