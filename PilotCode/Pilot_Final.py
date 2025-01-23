@@ -675,11 +675,11 @@ def create_homogeneous_background(window, duration, color):
                         size=(250, 250),
                         mask="None",
                         texRes=256,
-                        contrast = 1,
                         sf=0,
                         ),
         sweep_params={
-                'Ori': ([color], 0),
+                'Contrast': ([1], 0),
+                'Color': ([color], 1),
                 },
         sweep_length=duration,
         start_time=0.0,
@@ -892,7 +892,7 @@ if __name__ == "__main__":
 
     # Here we add 2 min long of delay to accomodate change in luminance
     current_time = current_time+length_rf_seconds+delay_luminance 
-    background_homogeneous = create_homogeneous_background(win, duration=delay_luminance, color=0)
+    background_homogeneous = create_homogeneous_background(win, duration=delay_luminance, color=-1)
     background_homogeneous.set_display_sequence([(current_time, current_time+delay_luminance)])
     All_stim.append(background_homogeneous)
     print("length_delay_luminance_seconds: ",delay_luminance)
@@ -936,7 +936,7 @@ if __name__ == "__main__":
 
     # Here we add 2 min long of delay to accomodate change in luminance
     current_time = current_time+length_speed_seconds+inter_block_interval
-    background_homogeneous_2 = create_homogeneous_background(win, duration=delay_luminance, color=0.5)
+    background_homogeneous_2 = create_homogeneous_background(win, duration=delay_luminance, color=0)
     background_homogeneous_2.set_display_sequence([(current_time, current_time+delay_luminance)])
     All_stim.append(background_homogeneous_2)
     print("length_delay_luminance_seconds: ",delay_luminance)
