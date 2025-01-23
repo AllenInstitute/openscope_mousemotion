@@ -666,7 +666,32 @@ def create_gratingStim(window, number_runs = 15):
     stimulus_grating.stim_path = r"C:\\not_a_stim_script\\drifting_gratings_field_block.stim"
     return stimulus_grating
 
+def create_homogeneous_background(window, duration, color):
+    # Create an homogeneous background with a color
+    # color is 1 for white and 0 for black
+    stimulus = Stimulus(visual.GratingStim(window,
+                        pos=(0, 0),
+                        units='deg',
+                        size=(250, 250),
+                        mask="None",
+                        texRes=256,
+                        sf=0,
+                        ),
+        sweep_params={
+                'Ori': ([color], 0),
+                },
+        sweep_length=duration,
+        start_time=0.0,
+        blank_length=0.0,
+        blank_sweeps=0,
+        runs=1,
+        shuffle=True,
+        save_sweep_table=True,
+        )
+    stimulus.stim_path = r"C:\\not_a_stim_script\\homogeneous_background.stim"
 
+    return stimulus
+    
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("mtrain")
     parser.add_argument("json_path", nargs="?", type=str, default="")
@@ -698,7 +723,7 @@ if __name__ == "__main__":
     data_folder = json_params.get('data_folder', os.path.abspath(
         os.path.join(script_path, '..', "data")))
 
-    nDotsPer1SqrArea = [0.0003]
+    nDotsPer1SqrArea = [0.0002]
     fieldSizeCircle_default = [196] # For varying do [5,20,40]
     fieldSizeSquare_default = [2000] # For varying do [100,100,100]
     dotDensity_default = nDotsPer1SqrArea
@@ -708,8 +733,8 @@ if __name__ == "__main__":
     dirVecCirc = [0,180]
     dirVecSqr =[0,180,90]
     coherence_vec = [1]
-    dotsize_vec = [50] # [50] # [25] old parameter
-    dotspeed_vec = [3]
+    dotsize_vec = [40] 
+    dotspeed_vec = [5]
 
     if dev_mode:
         my_monitor = monitors.Monitor(name='Test')
@@ -756,7 +781,7 @@ if __name__ == "__main__":
     color_dots = (255,255,255)
 
     # COHERENCE block 
-    coherence_vec_exp = [1, 0.75, 0.5, 0.25, 0] 
+    coherence_vec_exp = [1, 0.9, 0.75, 0.6, 0.4] 
 
     both_stimuli_coherence = createBlock(win, coherence_vec_exp,coherence_vec_exp,
                                          'FieldCoherence'
@@ -788,7 +813,7 @@ if __name__ == "__main__":
                                             ,vertical_pos
                                             )
     # DOT speed block
-    dotspeed_vec_exp = [0.7,3,6]
+    dotspeed_vec_exp = [3,5,7]
     both_stimuli_speed = createBlock(win, dotspeed_vec_exp,dotspeed_vec_exp,
                                          'speed'
                                          ,SPEED_IND
@@ -803,8 +828,8 @@ if __name__ == "__main__":
                                          )
         
     # DOT fieldsize block
-    fieldSizeCircle_exp = [146,196,298,460]
-    fieldSizeSquare_exp  = [2000,2000,2000,2000] # Both should be the same size
+    fieldSizeCircle_exp = [146,196,298]
+    fieldSizeSquare_exp  = [2000,2000,2000] # Both should be the same size
     both_stimuli_Fieldsize = createBlock(win, fieldSizeCircle_exp,fieldSizeSquare_exp,
                                             'fieldSize'
                                             ,FIELD_SIZE_IND
@@ -831,7 +856,7 @@ if __name__ == "__main__":
 
     nb_runs_ephys_rf = 12
     ephys_rf_stim = create_receptive_field_mapping(win, number_runs=nb_runs_ephys_rf)
-    drifting_grating_stim = create_gratingStim(win, number_runs=num_reps)
+    drifting_grating_stim = create_gratingStim(win, number_runs=10)
 
     All_stim = []
 
@@ -858,17 +883,6 @@ if __name__ == "__main__":
     All_stim.append(ephys_rf_stim)
     print("length_rf_seconds: ",length_rf_seconds)
     
-    # drifting_grating_stim
-    current_time = current_time+length_rf_seconds+inter_block_interval
-
-    if num_reps == 1:
-        length_drifting_grating_seconds = 10
-    else:
-        length_drifting_grating_seconds = 8*1.5*num_reps
-
-    drifting_grating_stim.set_display_sequence([(current_time, current_time+length_drifting_grating_seconds)])
-    All_stim.append(drifting_grating_stim)
-    print("length_drifting_grating_seconds: ",length_drifting_grating_seconds)
 
     if num_reps == 1:
         delay_luminance = 10
@@ -876,11 +890,25 @@ if __name__ == "__main__":
         delay_luminance = 120
 
     # Here we add 2 min long of delay to accomodate change in luminance
-    current_time = current_time+length_drifting_grating_seconds+delay_luminance #120
+    current_time = current_time+length_rf_seconds+delay_luminance 
+    background_homogeneous = create_homogeneous_background(win, duration=delay_luminance, color=0)
+    background_homogeneous.set_display_sequence([(current_time, current_time+delay_luminance)])
+    All_stim.append(background_homogeneous)
+    print("length_delay_luminance_seconds: ",delay_luminance)
+
+    # Add blockFieldSize        
+    current_time = current_time+delay_luminance
+    fps = both_stimuli_coherence.stimuli[0].fps
+    length_fieldsize_frames = both_stimuli_Fieldsize.get_total_frames()
+    length_fieldsize_seconds = float(length_fieldsize_frames) / float(fps)    
+    blockFieldSize = [(current_time, current_time+length_fieldsize_seconds)] 
+    both_stimuli_Fieldsize.set_display_sequence(blockFieldSize)
+    All_stim.append(both_stimuli_Fieldsize)
+    print("length_fieldsize_seconds: ",length_fieldsize_seconds)
     
     # Add blockCoherence
+    current_time = current_time+length_fieldsize_seconds+inter_block_interval 
     length_coherence_frames = both_stimuli_coherence.get_total_frames()
-    fps = both_stimuli_coherence.stimuli[0].fps
     length_coherence_seconds = float(length_coherence_frames) / float(fps)
     blockCoherence = [(current_time, current_time+length_coherence_seconds)]    
     both_stimuli_coherence.set_display_sequence(blockCoherence)
@@ -905,15 +933,24 @@ if __name__ == "__main__":
     All_stim.append(both_stimuli_speed)
     print("length_speed_seconds: ",length_speed_seconds)
 
-    # Add blockFieldSize    
-    current_time = current_time+inter_block_interval+length_speed_seconds
-    length_fieldsize_frames = both_stimuli_Fieldsize.get_total_frames()
-    length_fieldsize_seconds = float(length_fieldsize_frames) / float(fps)    
-    blockFieldSize = [(current_time, current_time+length_fieldsize_seconds)] 
-    both_stimuli_Fieldsize.set_display_sequence(blockFieldSize)
-    All_stim.append(both_stimuli_Fieldsize)
-    print("length_fieldsize_seconds: ",length_fieldsize_seconds)
-    
+    # Here we add 2 min long of delay to accomodate change in luminance
+    current_time = current_time+length_speed_seconds+inter_block_interval
+    background_homogeneous_2 = create_homogeneous_background(win, duration=delay_luminance, color=0.5)
+    background_homogeneous_2.set_display_sequence([(current_time, current_time+delay_luminance)])
+    All_stim.append(background_homogeneous_2)
+    print("length_delay_luminance_seconds: ",delay_luminance)
+
+    # drifting_grating_stim
+    current_time = current_time+delay_luminance
+
+    if num_reps == 1:
+        length_drifting_grating_seconds = 10
+    else:
+        length_drifting_grating_seconds = 8*1.5*10
+
+    drifting_grating_stim.set_display_sequence([(current_time, current_time+length_drifting_grating_seconds)])
+    All_stim.append(drifting_grating_stim)
+    print("length_drifting_grating_seconds: ",length_drifting_grating_seconds)
 
     pre_blank = 0
     post_blank = 0
