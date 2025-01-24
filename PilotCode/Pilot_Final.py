@@ -901,16 +901,19 @@ if __name__ == "__main__":
     else:   
         delay_luminance = 120
 
+    fps = both_stimuli_coherence.stimuli[0].fps
+
     # Here we add 2 min long of delay to accomodate change in luminance
     current_time = current_time+length_drifting_grating_seconds+delay_luminance 
     background_homogeneous = create_homogeneous_background(win, duration=delay_luminance, color=-1)
-    background_homogeneous.set_display_sequence([(current_time, current_time+delay_luminance)])
+    
+    # we add one frame to avoid a blip in gray. 
+    background_homogeneous.set_display_sequence([(current_time, current_time+delay_luminance+1/fps)])
     All_stim.append(background_homogeneous)
     print("length_delay_luminance_seconds: ",delay_luminance)
 
     # Add blockFieldSize        
     current_time = current_time+delay_luminance
-    fps = both_stimuli_coherence.stimuli[0].fps
     length_fieldsize_frames = both_stimuli_Fieldsize.get_total_frames()
     length_fieldsize_seconds = float(length_fieldsize_frames) / float(fps)    
     blockFieldSize = [(current_time, current_time+length_fieldsize_seconds)] 
