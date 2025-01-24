@@ -907,8 +907,7 @@ if __name__ == "__main__":
     current_time = current_time+length_drifting_grating_seconds+delay_luminance 
     background_homogeneous = create_homogeneous_background(win, duration=delay_luminance, color=-1)
     
-    # we add one frame to avoid a blip in gray. 
-    background_homogeneous.set_display_sequence([(current_time, current_time+delay_luminance+3/fps)])
+    background_homogeneous.set_display_sequence([(current_time, current_time+delay_luminance)])
     All_stim.append(background_homogeneous)
     print("length_delay_luminance_seconds: ",delay_luminance)
 
