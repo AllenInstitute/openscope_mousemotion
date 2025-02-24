@@ -696,6 +696,10 @@ def callAccParameter(win, num_reps_ex
         # sweep order and sweep table    
         rdkSqr.sweep_order = sweepOrderSqr
         rdkCircle.sweep_order = sweepOrderCirc
+        rdkSqr.sweep_table = combined_sweepTable_sqr
+        rdkCircle.sweep_table = combined_sweepTable_circle
+
+                         
       #  list_diameters = np.array([[(float(indiv_sweep[FIELD_SIZE_IND])),(float(indiv_sweep[FIELD_SIZE_IND]))] for indiv_sweep in rdkCircle.sweep_table])
       #  list_opacity = np.array([(float(indiv_sweep[OPACITY_IND])) for indiv_sweep in rdkCircle.sweep_table])
         
