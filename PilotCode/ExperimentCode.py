@@ -362,12 +362,10 @@ def set_new_trial_orders (alltrial, circTable, sqrTable):
         selected_elements1Sqr = tuple([trial[i] for i in sqrIndices ])
         #look for the index of the list to match the order between the circle and sqr
         sweepOrderCirc=([j for j, tpl in enumerate(circTable) if tpl == (selected_elementsCircle)])
-        print(sweepOrderCirc)
         if not sweepOrderCirc:
            raise ValueError("No matching tuple for {} in sqrTable".format(selected_elementsCircle))
         sweepOrderCirc_all.append(int(sweepOrderCirc[0]))        
         sweepOrderSqr=([k for k, tpl in enumerate(sqrTable) if tpl == (selected_elements1Sqr)])
-        print(sweepOrderSqr)
         if not sweepOrderSqr:
            raise ValueError("No matching tuple for {} in sqrTable".format(selected_elements1Sqr))
         sweepOrderSqr_all.append(int(sweepOrderSqr[0]))   
@@ -896,7 +894,7 @@ if __name__ == "__main__":
         my_monitor.setDistance(dist)
         my_monitor.saveMon()
         win = Window(size=[800,600], # [1024,768],
-            fullscr=False,
+            fullscr=True,
             screen=0,
             monitor= my_monitor,
             warp=Warp.Spherical,
