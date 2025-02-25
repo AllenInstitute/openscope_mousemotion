@@ -867,7 +867,7 @@ if __name__ == "__main__":
     wid = 52.0
 
     # mtrain should be providing : a path to a network folder or a local folder with the entire repo pulled
-    vertical_pos = json_params.get('vertical_pos', 8)
+    vertical_pos = json_params.get('vertical_pos', 0)
     num_reps = json_params.get('num_reps', 1) # num of rep should be 22
     dev_mode = json_params.get('dev_mode', True)
     inter_block_interval = json_params.get('inter_block_interval', 10)
@@ -950,29 +950,15 @@ if __name__ == "__main__":
                                          ,color_dots
                                          ,vertical_pos
                                          )
-    
-#
-#
+
     nb_runs_ephys_rf = 12
     ephys_rf_stim = create_receptive_field_mapping(win, number_runs=nb_runs_ephys_rf)
     drifting_grating_stim = create_gratingStim(win, number_runs=22)
 
     All_stim = []
 
-    # Add LSN
-    current_time = 0
-
-#    # this is to make the LSN block shorter for the test mode
-#    if num_reps == 1:
-#        length_lsn_seconds = 10
-#    else:
-#        length_lsn_seconds = 740
-#    lsn_stim.set_display_sequence([(current_time, current_time+length_lsn_seconds)])
-#    All_stim.append(lsn_stim)
-#    print("length_lsn_seconds: ",length_lsn_seconds)
-    
     # Add RF code from ephys
-    current_time = current_time+inter_block_interval
+    current_time = 0
     if num_reps == 1:
         length_rf_seconds = 10
     else: 
@@ -1009,7 +995,6 @@ if __name__ == "__main__":
     All_stim.append(background_homogeneous)
     print("length_delay_luminance_seconds: ",delay_luminance)
 
-#
     # Add blockCoherence
     current_time = current_time+delay_luminance
     length_coherence_frames = both_stimuli_coherence.get_total_frames()
@@ -1018,8 +1003,6 @@ if __name__ == "__main__":
     both_stimuli_coherence.set_display_sequence(blockCoherence)
     All_stim.append(both_stimuli_coherence)
     print("length_coherence_seconds: ",length_coherence_seconds)
-    
-# 
 
     pre_blank = 0
     post_blank = 0
