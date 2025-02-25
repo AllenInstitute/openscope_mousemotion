@@ -42,7 +42,9 @@ BLANK_SWEEPS_NUM        = 0
 PIOVER2 = np.pi / 2.
 PIOVER180 = np.pi / 180.
 PI_2 = 2 * np.pi
-NUM_REP = 22
+
+# NUM_REP = 22 commented to avoid confusion, repeat is provided by mtrain
+
 # The following fixes the issue with the dots not being created on the edges of the screen. 
 class FixedDotStim(visual.DotStim):
     def __init__(self, *args, **kwargs):
